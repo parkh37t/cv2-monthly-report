@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>컨버전스 2본부 - 월별 현황 관리</title>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+:root{--primary:#1a56db;--primary-l:#e8effc;--primary-d:#12408a;--ok:#059669;--ok-l:#d1fae5;--warn:#d97706;--warn-l:#fef3c7;--err:#dc2626;--err-l:#fee2e2;--g50:#f9fafb;--g100:#f3f4f6;--g200:#e5e7eb;--g300:#d1d5db;--g400:#9ca3af;--g500:#6b7280;--g600:#4b5563;--g700:#374151;--g800:#1f2937;--r:8px;--sh:0 1px 3px rgba(0,0,0,.1);--shm:0 4px 6px -1px rgba(0,0,0,.1)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:var(--g100);color:var(--g800);line-height:1.5;font-size:14px}
+.hdr{background:linear-gradient(135deg,#0f3d8c 0%,#1a56db 100%);color:#fff;padding:16px 0;position:sticky;top:0;z-index:100;box-shadow:var(--shm)}
+.hdr-in{max-width:1600px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.hdr h1{font-size:18px;font-weight:700} .hdr .sub{font-size:12px;opacity:.8;margin-top:2px}
+.hdr-r{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.hdr-r select{padding:6px 10px;border-radius:6px;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.15);color:#fff;font-size:13px}
+.hdr-r select option{color:#333;background:#fff}
+.btn{padding:7px 14px;border:none;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:5px}
+.btn-w{background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.3)} .btn-w:hover{background:rgba(255,255,255,.35)}
+.btn-p{background:var(--primary);color:#fff} .btn-p:hover{background:var(--primary-d)}
+.btn-ok{background:var(--ok);color:#fff} .btn-ok:hover{background:#047857}
+.btn-err{background:var(--err-l);color:var(--err);border:1px solid #fca5a5} .btn-err:hover{background:#fecaca}
+.btn-s{background:#fff;color:var(--g700);border:1px solid var(--g300)} .btn-s:hover{border-color:var(--primary);color:var(--primary)}
+.ct{max-width:1600px;margin:0 auto;padding:20px 24px}
+.tabs{display:flex;gap:4px;border-bottom:2px solid var(--g200);margin-bottom:20px;overflow-x:auto;flex-wrap:nowrap}
+.tab{padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;color:var(--g500);transition:all .2s}
+.tab:hover{color:var(--primary)} .tab.active{color:var(--primary);border-bottom-color:var(--primary)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:20px}
+.card{background:#fff;border-radius:var(--r);padding:14px;box-shadow:var(--sh);text-align:center}
+.card .lb{font-size:11px;color:var(--g500);margin-bottom:2px} .card .vl{font-size:20px;font-weight:700;margin:2px 0}
+.card .vl.pos{color:var(--ok)} .card .vl.neg{color:var(--err)} .card .vl.blue{color:var(--primary)}
+.card .sub{font-size:11px;color:var(--g400);margin-top:2px}
+.pbar{height:8px;background:var(--g200);border-radius:4px;overflow:hidden;margin-top:6px}
+.pbar-f{height:100%;border-radius:4px;transition:width .5s}
+.tbl-wrap{background:#fff;border-radius:var(--r);box-shadow:var(--sh);overflow-x:auto;margin-bottom:16px}
+.tbar{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--g200);flex-wrap:wrap;gap:8px}
+.tbar h3{font-size:15px;font-weight:600}
+table{width:100%;border-collapse:collapse;min-width:700px}
+thead th{padding:8px 10px;background:var(--g50);font-size:11px;font-weight:600;color:var(--g600);text-align:left;border-bottom:2px solid var(--g200);white-space:nowrap;position:sticky;top:0}
+tbody td{padding:7px 10px;font-size:12px;border-bottom:1px solid var(--g100);white-space:nowrap}
+tbody tr:hover{background:var(--g50)}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+td.calc{background:#f0f7ff;color:var(--primary);font-weight:600;text-align:right}
+td.tgt{background:#fffbeb;color:#92400e;font-weight:600;text-align:right}
+td.neg{color:var(--err)} td.bold{font-weight:700}
+th.tgt-col{background:#fffbeb;color:#92400e}
+th.cum-col{background:#f0f7ff;color:var(--primary)}
+th.ach-col{background:#d1fae5;color:var(--ok)}
+.empty{text-align:center;padding:40px;color:var(--g400)}
+.mo{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:200;align-items:center;justify-content:center;padding:20px}
+.mo.show{display:flex}
+.mo-c{background:#fff;border-radius:12px;padding:24px;width:100%;max-width:600px;max-height:90vh;overflow-y:auto;box-shadow:var(--shm)}
+.mo-c h2{font-size:17px;font-weight:700;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--g200)}
+.fg{margin-bottom:14px} .fg label{display:block;font-size:12px;font-weight:600;color:var(--g600);margin-bottom:4px}
+.fg input,.fg select,.fg textarea{width:100%;padding:8px 10px;border:1px solid var(--g300);border-radius:6px;font-size:13px;font-family:inherit}
+.fg input:focus,.fg select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-l)}
+.ma{display:flex;justify-content:flex-end;gap:8px;margin-top:20px;padding-top:16px;border-top:1px solid var(--g200)}
+.pnl{display:none} .pnl.active{display:block}
+.rev-input{width:130px;padding:5px 8px;border:1px solid var(--g300);border-radius:5px;text-align:right;font-size:12px;font-family:inherit}
+.rev-input:focus{outline:none;border-color:var(--primary)}
+.tp-row td{font-size:11px !important;font-style:italic}
+.risk-wrap{display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:12px}
+.risk-box{background:#fff;border-radius:var(--r);box-shadow:var(--sh);overflow:hidden}
+.risk-box.danger{border-left:4px solid #dc2626}.risk-box.warn{border-left:4px solid #d97706}.risk-box.ok{border-left:4px solid var(--ok)}
+.risk-hdr{padding:10px 14px;font-size:13px;font-weight:700;display:flex;align-items:center;gap:6px}
+.risk-hdr.dg{background:#fef2f2;color:#dc2626}.risk-hdr.wn{background:#fffbeb;color:#92400e}
+.risk-row{display:flex;align-items:center;padding:7px 14px;font-size:12px;gap:8px;border-top:1px solid var(--g100)}
+.rb{display:inline-block;padding:1px 6px;border-radius:3px;font-size:10px;font-weight:600;white-space:nowrap}
+.rb-r{background:#fee2e2;color:#dc2626}.rb-y{background:#fef3c7;color:#d97706}
+.risk-msg{flex:1;line-height:1.4}.risk-val{font-weight:600;white-space:nowrap;font-size:11px}
+.mstrip{display:flex;gap:4px;padding:8px 16px;overflow-x:auto;background:#fff;border-bottom:1px solid var(--g200);flex-wrap:wrap}
+.mchip{padding:4px 10px;border-radius:12px;font-size:11px;cursor:pointer;white-space:nowrap;border:1px solid var(--g200);background:#fff;color:var(--g500);transition:all .2s}
+.mchip:hover{border-color:var(--primary);color:var(--primary)}.mchip.cur{background:var(--primary);color:#fff;border-color:var(--primary)}.mchip.has{background:var(--ok-l);color:var(--ok);border-color:#a7f3d0}
+.vtog{display:flex;gap:4px}.vtog button{padding:4px 10px;border-radius:4px;font-size:11px;cursor:pointer;border:1px solid var(--g300);background:#fff;color:var(--g600)}.vtog button.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.grp-hdr td{background:#eef2ff !important;font-weight:700;color:var(--primary);font-size:12px;padding:6px 10px !important}
+@media(max-width:768px){.ct{padding:12px}.cards{grid-template-columns:repeat(2,1fr)}.risk-wrap{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-in">
+    <div>
+      <h1>컨버전스 2본부 - 2026년 월별 현황 관리</h1>
+      <div class="sub">매출목표 70억 | 영업이익목표 6.5억 | 실적 등록/수정/삭제 및 엑셀 다운로드</div>
+    </div>
+    <div class="hdr-r">
+      <select id="selMonth" onchange="switchMonth()">
+        <option value="1">1월</option><option value="2">2월</option><option value="3" selected>3월</option>
+        <option value="4">4월</option><option value="5">5월</option><option value="6">6월</option>
+        <option value="7">7월</option><option value="8">8월</option><option value="9">9월</option>
+        <option value="10">10월</option><option value="11">11월</option><option value="12">12월</option>
+      </select>
+      <button class="btn btn-w" onclick="uploadExcel()">&#128228; 결산자료 업로드</button>
+      <button class="btn btn-w" onclick="downloadExcel()">&#128229; 엑셀 다운로드 (전체)</button>
+      <input type="file" id="excelUpload" accept=".xlsx,.xls" style="display:none" onchange="processExcelUpload(event)">
+    </div>
+  </div>
+</div>
+
+<div class="ct">
+  <div class="tabs">
+    <div class="tab active" onclick="showTab('dashboard',this)">&#128202; 대시보드</div>
+    <div class="tab" onclick="showTab('labor',this)">&#128101; 내부/외주 인건비</div>
+    <div class="tab" onclick="showTab('invoice',this)">&#128196; 매출세금계산서</div>
+    <div class="tab" onclick="showTab('payment',this)">&#128176; 입금</div>
+    <div class="tab" onclick="showTab('purchase',this)">&#128722; 매입(턴키)</div>
+    <div class="tab" onclick="showTab('expense',this)">&#128181; 직접비/간접비</div>
+    <div class="tab" onclick="showTab('contract',this)">&#128203; 누적 매출</div>
+  </div>
+
+  <!-- 대시보드 -->
+  <div class="pnl active" id="pnl-dashboard">
+    <div class="cards" id="summaryCards"></div>
+    <div class="tbl-wrap">
+      <div class="tbar"><h3>2026년 월별 손익 현황 (12개월)</h3>
+        <div style="font-size:11px;color:var(--g400)">(단위: 원, 진행매출 기준)</div>
+      </div>
+      <div style="overflow-x:auto">
+        <table id="detailTable"></table>
+      </div>
+    </div>
+    <div class="tbl-wrap">
+      <div class="tbar"><h3>월별 매출 관리</h3>
+        <div style="font-size:11px;color:var(--g400)">발행매출 자동합산 | 진행매출 수동조정 (미입력시 발행매출 자동 적용)</div>
+      </div>
+      <div style="overflow-x:auto">
+        <table id="revenueTable"></table>
+      </div>
+    </div>
+    <div id="riskSection" style="margin-bottom:16px"></div>
+    <div class="tbl-wrap">
+      <div class="tbar"><h3 id="projectTitle">프로젝트별 원가 현황</h3></div>
+      <table><thead><tr><th>프로젝트</th><th class="num">내부인건비</th><th class="num">외주인건비</th><th class="num">직접비</th><th class="num">원가합계</th></tr></thead>
+      <tbody id="projectBody"></tbody></table>
+    </div>
+  </div>
+
+  <!-- 내부/외주 인건비 -->
+  <div class="pnl" id="pnl-labor">
+    <div id="laborStrip"></div>
+    <div class="tbl-wrap"><div class="tbar"><h3>내부/외주 인건비 (<span id="laborMonthLabel"></span>)</h3>
+      <div style="display:flex;gap:8px;align-items:center">
+        <div class="vtog" id="laborVtog"><button class="active" onclick="setView('labor',false)">당월</button><button onclick="setView('labor',true)">전체</button></div>
+        <button class="btn btn-p" onclick="openModal('labor')">+ 인건비 추가</button></div></div>
+      <div style="overflow-x:auto"><table id="laborTable"></table></div></div>
+  </div>
+
+  <!-- 매출세금계산서 -->
+  <div class="pnl" id="pnl-invoice">
+    <div id="invoiceStrip"></div>
+    <div class="tbl-wrap"><div class="tbar"><h3>매출세금계산서 (<span id="invMonthLabel"></span>)</h3>
+      <div style="display:flex;gap:8px;align-items:center">
+        <div class="vtog" id="invoiceVtog"><button class="active" onclick="setView('invoice',false)">당월</button><button onclick="setView('invoice',true)">전체</button></div>
+        <button class="btn btn-p" onclick="openModal('invoice')">+ 매출 추가</button></div></div>
+      <div style="overflow-x:auto"><table id="invoiceTable"></table></div></div>
+  </div>
+
+  <!-- 입금 -->
+  <div class="pnl" id="pnl-payment">
+    <div id="paymentStrip"></div>
+    <div class="tbl-wrap"><div class="tbar"><h3>입금 현황 (<span id="payMonthLabel"></span>)</h3>
+      <div style="display:flex;gap:8px;align-items:center">
+        <div class="vtog" id="paymentVtog"><button class="active" onclick="setView('payment',false)">당월</button><button onclick="setView('payment',true)">전체</button></div>
+        <button class="btn btn-p" onclick="openModal('payment')">+ 입금 추가</button></div></div>
+      <div style="overflow-x:auto"><table id="paymentTable"></table></div></div>
+  </div>
+
+  <!-- 매입 턴키 -->
+  <div class="pnl" id="pnl-purchase">
+    <div id="purchaseStrip"></div>
+    <div class="tbl-wrap"><div class="tbar"><h3>매입 (턴키) (<span id="purMonthLabel"></span>)</h3>
+      <div style="display:flex;gap:8px;align-items:center">
+        <div class="vtog" id="purchaseVtog"><button class="active" onclick="setView('purchase',false)">당월</button><button onclick="setView('purchase',true)">전체</button></div>
+        <button class="btn btn-p" onclick="openModal('purchase')">+ 매입 추가</button></div></div>
+      <div style="overflow-x:auto"><table id="purchaseTable"></table></div></div>
+  </div>
+
+  <!-- 직접비/간접비 -->
+  <div class="pnl" id="pnl-expense">
+    <div id="expenseStrip"></div>
+    <div class="tbl-wrap"><div class="tbar"><h3>직접비 (<span id="expMonthLabel"></span>)</h3>
+      <div style="display:flex;gap:8px;align-items:center">
+        <div class="vtog" id="expenseVtog"><button class="active" onclick="setView('expense',false)">당월</button><button onclick="setView('expense',true)">전체</button></div>
+        <button class="btn btn-p" onclick="openModal('expense')">+ 비용 추가</button></div></div>
+      <div style="overflow-x:auto"><table id="expenseTable"></table></div></div>
+    <div class="tbl-wrap" style="margin-top:16px"><div class="tbar"><h3>간접비</h3>
+      <div style="display:flex;align-items:center;gap:8px">
+        <label style="font-size:13px;color:var(--g600)">월 간접비:</label>
+        <input type="text" id="indirectCost" class="rev-input" style="width:160px" onchange="saveIndirect()">
+      </div></div></div>
+  </div>
+
+  <!-- 누적 매출 -->
+  <div class="pnl" id="pnl-contract">
+    <div class="tbl-wrap"><div class="tbar"><h3>현재 누적 매출 현황 상세</h3>
+      <div style="display:flex;gap:8px;align-items:center">
+        <div id="contractTargetInfo" style="font-size:12px;color:var(--g500)"></div>
+        <button class="btn btn-p" onclick="openModal('contract')">+ 매출 추가</button></div></div>
+      <div style="overflow-x:auto"><table id="contractTable"></table></div></div>
+  </div>
+</div>
+
+<!-- 모달 -->
+<div class="mo" id="modal"><div class="mo-c">
+  <h2 id="moTitle">데이터 추가</h2><div id="moBody"></div>
+  <div class="ma"><button class="btn btn-s" onclick="closeModal()">취소</button><button class="btn btn-p" onclick="saveModal()">저장</button></div>
+</div></div>
+
+<script>
+const STORAGE='cv2_monthly_v11';
+const DEPT='컨버전스 2본부';
+const TARGET_REVENUE=7000000000;
+const TARGET_OP_PROFIT=650000000;
+const MONTHS=Array.from({length:12},(_,i)=>i+1);
+let curMonth=3, curModalType='', curEditIdx=-1, curEditMonth=null;
+const viewMode={labor:false,invoice:false,payment:false,purchase:false,expense:false};
+
+function emptyMonth(){return{labor:[],invoice:[],payment:[],purchase:[],expense:[],indirect:0,revenue:0}}
+
+function defaultData(){
+  const d={months:{},contractSales:defaultContractSales()};
+  MONTHS.forEach(m=>{d.months[m]=emptyMonth()});
+
+  // ===== 1월 결산자료 =====
+  const m1=d.months[1];
+  m1.revenue=345487037;
+  m1.indirect=45900713;
+  m1.labor=[
+    {type:'공통',project:'공통',intPerson:1.5,intCost:16371857,extPerson:0,extCost:0,fee:0},
+    {type:'제안',project:'DB손해보험 PA 모바일 영업지원 시스템 구축 제안',intPerson:1,intCost:2272934,extPerson:1,extCost:6000000,fee:0},
+    {type:'프로젝트',project:'CTK 플랫폼 고도화 사업 프로젝트',intPerson:7,intCost:48042115,extPerson:2,extCost:10189526,fee:696000},
+    {type:'프로젝트',project:'메리츠화재 인터넷 마케팅 플랫폼 운영 용역',intPerson:9.6,intCost:56903667,extPerson:2,extCost:13211900,fee:0},
+    {type:'프로젝트',project:'법원도서관 미래통합관리시스템 구축 및 데이터 연계활용성 강화',intPerson:1,intCost:7367082,extPerson:3,extCost:8953818,fee:0},
+    {type:'프로젝트',project:'수협중앙회 수산물 사이버 직매장 시스템',intPerson:2.3,intCost:16825988,extPerson:1,extCost:3123224,fee:208000},
+    {type:'프로젝트',project:'엘지씨엔에스_하나은행 FIRST 하나원큐 UIUX',intPerson:16,intCost:84028211,extPerson:19,extCost:146368080,fee:800000}
+  ];
+  m1.invoice=[
+    {type:'매출',date:'2025-12-23',client:'메리츠화재해상보험',bizNo:'116-81-03752',item:'메리츠화재 인터넷 플랫폼 용역 (추가합의)',amount:17200000,dept:DEPT},
+    {type:'매출',date:'2025-12-31',client:'메리츠화재해상보험',bizNo:'116-81-03752',item:'메리츠화재 인터넷 플랫폼 12월 용역 (TM업무)',amount:73600000,dept:DEPT},
+    {type:'매출',date:'2025-12-09',client:'대법원 법원도서관',bizNo:'214-83-00621',item:'25년 법원도서관 미래통합관리시스템 구축 선금',amount:62272728,dept:DEPT},
+    {type:'매출',date:'2025-12-15',client:'(주)엘지씨엔에스',bizNo:'116-81-19477',item:'하나은행 FIRST 프로젝트 중도금',amount:60862020,dept:DEPT}
+  ];
+  m1.payment=[
+    {type:'입금',date:'2025-12-01',client:'메리츠화재해상보험',item:'메리츠화재 인터넷 플랫폼 11월 용역 (TM업무)',amount:73600000,dept:DEPT},
+    {type:'입금',date:'2025-12-24',client:'메리츠화재해상보험',item:'메리츠화재 인터넷 플랫폼 용역 (추가합의)',amount:17200000,dept:DEPT},
+    {type:'입금',date:'2025-12-11',client:'대법원 법원도서관',item:'25년 법원도서관 미래통합관리시스템 구축 선금',amount:62272727,dept:DEPT},
+    {type:'입금',date:'2025-12-02',client:'(주)엘지씨엔에스',item:'하나은행 FIRST 프로젝트 - 변경계약 중도금3 (13.61%)',amount:591693000,dept:DEPT},
+    {type:'입금',date:'2025-12-17',client:'(주)엘지씨엔에스',item:'하나은행 FIRST 프로젝트 - 변경계약 중도금4 (1.40%)',amount:60862020,dept:DEPT}
+  ];
+  m1.purchase=[
+    {type:'매입',date:'2025-12-05',client:'(주)이씨오',bizNo:'211-86-14883',item:'법원도서관 미래통합관리시스템 구축 프로젝트',amount:8100000,dept:DEPT},
+    {type:'매입',date:'2025-12-24',client:'(주) 유컴패니온',bizNo:'211-88-79196',item:'하나은행 원큐 차세대프로젝트(잔금)',amount:8405646,dept:DEPT}
+  ];
+  m1.expense=[
+    {type:'법인카드',desc:'박재하',project:'공통직접비',amount:596142},
+    {type:'법인카드',desc:'컨버전스 2본부 (제안 라운드앱)',project:'공통직접비',amount:27000},
+    {type:'기타',desc:'노트북 배터리교체(신수환)',project:'공통직접비',amount:119000},
+    {type:'지급수수료',desc:'실적증명서 발급수수료(KB자산운용)',project:'공통직접비',amount:22500},
+    {type:'지급수수료',desc:'피그마외 프로그램 사용수수료',project:'공통직접비',amount:299018},
+    {type:'법인카드',desc:'사승기',project:'하나은행_UIUX',amount:1702560},
+    {type:'법인카드',desc:'임지수',project:'하나은행_UIUX',amount:400000},
+    {type:'개인경비',desc:'임지수',project:'하나은행_UIUX',amount:46500},
+    {type:'법인카드',desc:'이인숙',project:'메리츠화재 운영',amount:398400},
+    {type:'개인경비',desc:'이인숙, 김형진',project:'메리츠화재 운영',amount:97000},
+    {type:'법인카드',desc:'김길숙',project:'CTK 플랫폼 고도화',amount:283590},
+    {type:'법인카드',desc:'국중욱',project:'CTK 플랫폼 고도화',amount:172400},
+    {type:'개인경비',desc:'김길숙',project:'CTK 플랫폼 고도화',amount:81000},
+    {type:'법인카드',desc:'표종락',project:'수협중앙회 수산물사이버직매장',amount:465000},
+    {type:'법인카드',desc:'김익중',project:'법원도서관',amount:38870},
+    {type:'개인경비',desc:'김익중',project:'법원도서관',amount:35300}
+  ];
+
+  // ===== 2월 결산자료 =====
+  const m2=d.months[2];
+  m2.revenue=265715406;
+  m2.indirect=52833408;
+  m2.labor=[
+    {type:'공통',project:'공통',intPerson:1,intCost:9068230,extPerson:0,extCost:0,fee:0},
+    {type:'제안',project:'DB손해보험 개인 PA모바일영업지원시스템 구축',intPerson:-1,intCost:-2272934,extPerson:-1,extCost:-6000000,fee:0},
+    {type:'프로젝트',project:'CTK 플랫폼 고도화 사업 프로젝트',intPerson:6.29,intCost:39900940,extPerson:1,extCost:4230657,fee:284000},
+    {type:'프로젝트',project:'DB손해보험 개인 PA모바일영업지원시스템 구축',intPerson:1.21,intCost:3853631,extPerson:2,extCost:14200000,fee:0},
+    {type:'프로젝트',project:'메리츠화재 인터넷 마케팅 플랫폼 운영 용역',intPerson:10,intCost:59089633,extPerson:2,extCost:13211900,fee:0},
+    {type:'프로젝트',project:'법원도서관 미래통합관리시스템 구축 및 데이터 연계활용성 강화',intPerson:1,intCost:7357641,extPerson:1,extCost:6051240,fee:0},
+    {type:'프로젝트',project:'수협중앙회 수산물 사이버 직매장 시스템',intPerson:2.62,intCost:14568146,extPerson:0,extCost:0,fee:0},
+    {type:'프로젝트',project:'엘지씨엔에스_하나은행 FIRST 하나원큐 UIUX',intPerson:14.81,intCost:75904813,extPerson:12,extCost:88472910,fee:400000},
+    {type:'유휴',project:'유휴(서의석)',intPerson:0.36,intCost:3162484,extPerson:0,extCost:0,fee:0}
+  ];
+  m2.invoice=[
+    {type:'매출',date:'2026-02-20',client:'(주)엘지씨엔에스',bizNo:'116-81-19477',item:'하나은행 FIRST 원큐 프로젝트 중도금',amount:256681400,dept:DEPT},
+    {type:'매출',date:'2026-02-20',client:'(주)엘지씨엔에스',bizNo:'116-81-19477',item:'하나은행 FIRST 원큐 프로젝트 중도금',amount:26405920,dept:DEPT},
+    {type:'매출',date:'2026-02-20',client:'(주)엘지씨엔에스',bizNo:'116-81-19477',item:'하나은행 FIRST 원큐 프로젝트 중도금',amount:217072520,dept:DEPT},
+    {type:'매출',date:'2026-02-20',client:'(주)엘지씨엔에스',bizNo:'116-81-19477',item:'하나은행 FIRST 원큐 프로젝트 중도금',amount:26405920,dept:DEPT},
+    {type:'매출',date:'2026-02-20',client:'엠투엠글로벌주식회사',bizNo:'120-86-35490',item:'수협중앙회 수산물사이버직매장 재구축 용역-3차 기성금',amount:135085601,dept:DEPT},
+    {type:'매출',date:'2026-02-25',client:'메리츠화재해상보험',bizNo:'116-81-03752',item:'메리츠화재 인터넷 플랫폼 2월 용역 (TM 업무 분)',amount:73600000,dept:DEPT},
+    {type:'매출',date:'2026-02-25',client:'메리츠화재해상보험',bizNo:'116-81-03752',item:'메리츠화재 인터넷 플랫폼 (추가합의) 2월 용역',amount:8600000,dept:DEPT},
+    {type:'매출',date:'2026-02-26',client:'대법원 법원도서관',bizNo:'214-83-00621',item:'25년 법원도서관 미래통합관리시스템 구축 선금 2차',amount:62272728,dept:DEPT},
+    {type:'매출',date:'2026-02-27',client:'주식회사 씨티케이',bizNo:'214-86-81682',item:'CTK 플랫폼 고도화 사업 잔금',amount:300000000,dept:DEPT}
+  ];
+  m2.payment=[
+    {type:'입금',date:'2026-02-03',client:'메리츠화재해상보험',item:'메리츠화재 인터넷 플랫폼 1월 용역 (TM 업무 분) 외',amount:82200000,dept:DEPT},
+    {type:'입금',date:'2026-02-10',client:'(주)엘지씨엔에스',item:'하나은행 FIRST 원큐 프로젝트 팀원 프로젝트 포상금',amount:200000,dept:DEPT},
+    {type:'입금',date:'2026-02-24',client:'(주)엘지씨엔에스',item:'하나은행 FIRST 원큐 프로젝트 중도금',amount:526565760,dept:DEPT},
+    {type:'입금',date:'2026-02-23',client:'엠투엠글로벌주식회사',item:'수협중앙회 수산물사이버직매장 재구축 용역-3차 기성금',amount:135085601,dept:DEPT},
+    {type:'입금',date:'2026-02-27',client:'대법원 법원도서관',item:'25년 법원도서관 미래통합관리시스템 구축 선금 2차',amount:62272727,dept:DEPT}
+  ];
+  m2.purchase=[
+    {type:'매입',date:'2026-02-28',client:'주식회사 언버스',bizNo:'107-88-21866',item:'CTK플랫폼 고도화(잔금)',amount:128980000,dept:DEPT},
+    {type:'매입',date:'2026-02-28',client:'주식회사메이븐디',bizNo:'260-87-01000',item:'CTK CLIP 홈페이지 프로젝트 잔금',amount:30880000,dept:DEPT},
+    {type:'매입',date:'2026-02-28',client:'주식회사메이븐디',bizNo:'260-87-01000',item:'현대자동차 교육시스템 구축 8월',amount:6525000,dept:DEPT}
+  ];
+  m2.expense=[
+    {type:'법인카드',desc:'박재하',project:'컨버전스 2본부 공통',amount:594060},
+    {type:'통로이미지(주)',desc:'클립아트코리아 이미지',project:'컨버전스 2본부 공통',amount:45899},
+    {type:'(주)맥플러스',desc:'Adobe 연간사용료',project:'컨버전스 2본부 공통',amount:865000},
+    {type:'FIGMA',desc:'FIGMA',project:'컨버전스 2본부 공통',amount:362814},
+    {type:'법인카드',desc:'이인숙',project:'메리츠화재 운영',amount:537960},
+    {type:'개인경비',desc:'이인숙',project:'메리츠화재 운영',amount:71600},
+    {type:'법인카드',desc:'임지수',project:'하나은행_UIUX',amount:927100},
+    {type:'(주)킴스렌탈',desc:'장비렌탈비',project:'하나은행_UIUX',amount:181000},
+    {type:'법인카드',desc:'김영환',project:'수협중앙회 수산물사이버직매장',amount:22350},
+    {type:'법인카드',desc:'김길숙',project:'CTK 플랫폼 고도화',amount:9900},
+    {type:'개인경비',desc:'사승기',project:'CTK 플랫폼 고도화',amount:61200},
+    {type:'(주)킴스렌탈',desc:'장비렌탈비',project:'CTK 플랫폼 고도화',amount:83000},
+    {type:'법인카드',desc:'김익중',project:'법원도서관',amount:39300},
+    {type:'(주)킴스렌탈',desc:'장비렌탈비',project:'법원도서관',amount:55000},
+    {type:'서울보증보험',desc:'선금보증보험(2차)',project:'법원도서관',amount:318260},
+    {type:'서울보증보험',desc:'계약보증보험',project:'디비손해보험 전산시스템 개발',amount:166400},
+    {type:'법인카드',desc:'김남경',project:'디비손해보험 전산시스템 개발',amount:34700}
+  ];
+
+  // ===== 3월 예상자료 (월별손익 시트 기준) =====
+  const m3=d.months[3];
+  m3.revenue=234679415;
+  m3.indirect=0;
+  m3.labor=[
+    {type:'프로젝트',project:'메리츠화재 인터넷 마케팅 플랫폼 운영 용역',intPerson:10,intCost:55000000,extPerson:2,extCost:13211900,fee:0},
+    {type:'프로젝트',project:'엘지씨엔에스_하나은행 FIRST 하나원큐 UIUX',intPerson:0.4,intCost:2350000,extPerson:3.42,extCost:27284000,fee:0},
+    {type:'프로젝트',project:'수협중앙회 수산물 사이버 직매장 시스템',intPerson:0.4,intCost:3265484,extPerson:0,extCost:0,fee:0},
+    {type:'프로젝트',project:'법원도서관 미래통합관리시스템 구축 및 데이터 연계활용성 강화',intPerson:1,intCost:7000000,extPerson:2,extCost:12000000,fee:0},
+    {type:'프로젝트',project:'CTK 플랫폼 고도화 사업 프로젝트',intPerson:1.9,intCost:13910000,extPerson:0,extCost:0,fee:0},
+    {type:'프로젝트',project:'DB손해보험 개인 PA모바일영업지원시스템 구축',intPerson:3.5,intCost:21100000,extPerson:4,extCost:35200000,fee:0},
+    {type:'프로젝트',project:'메리츠화재 TM LMS 교육시스템 구축',intPerson:0.29,intCost:3193548,extPerson:0.58,extCost:4253226,fee:0},
+    {type:'프로젝트',project:'CTKCLIP&파트너사이트 운영',intPerson:0,intCost:0,extPerson:0.58,extCost:4380000,fee:0}
+  ];
+  m3.invoice=[
+    {type:'매출',date:'2026-03-31',client:'(예상)',bizNo:'',item:'3월 예상 발행매출',amount:234679415,dept:DEPT}
+  ];
+  m3.expense=[
+    {type:'예상',desc:'3월 예상 직접비',project:'프로젝트 공통',amount:1952800}
+  ];
+
+  return d;
+}
+
+let data=load();
+function load(){const r=localStorage.getItem(STORAGE);if(r){const d=JSON.parse(r);MONTHS.forEach(m=>{if(!d.months[m])d.months[m]=emptyMonth()});if(!d.contractSales)d.contractSales=defaultContractSales();return d}return defaultData()}
+function defaultContractSales(){return[
+  {project:'메리츠화재 인터넷 마케팅 플랫폼 운영',amount:909000000},
+  {project:'하나은행 비대면채널 시스템구축',amount:132029700},
+  {project:'수협 수산물사이버 직매장 재구축',amount:20198392},
+  {project:'메리츠화재 홈페이지 웹접근성 인증',amount:22727273},
+  {project:'법원도서관 미래통합관리시스템',amount:179460667},
+  {project:'DB손해보험 PA 모바일영업지원',amount:513636364},
+  {project:'메리츠화재 TM LMS 교육시스템',amount:843000000},
+  {project:'CTKCLIP&파트너사이트 운영',amount:48000000}
+]}
+function save(){localStorage.setItem(STORAGE,JSON.stringify(data))}
+function md(){return data.months[curMonth]}
+function fmt(n){if(n==null||isNaN(n))return'-';return n<0?'('+Math.abs(n).toLocaleString('ko-KR')+')':n.toLocaleString('ko-KR')}
+function fmtB(n){if(!n&&n!==0)return'-';const a=n/100000000;return a<0?'('+Math.abs(a).toFixed(1)+'억)':a.toFixed(1)+'억'}
+function num(v){return parseFloat(v)||0}
+function parseNum(s){if(!s)return 0;const str=String(s);const neg=str.includes('(')&&str.includes(')');const n=parseFloat(str.replace(/[^0-9.\-]/g,''))||0;return neg?-Math.abs(n):n}
+function pct(v,t){return t?((v/t)*100).toFixed(1)+'%':'-'}
+
+function calcSummary(m){
+  const d=data.months[m];
+  if(!d)return{revenue:0,invoiceRev:0,intCost:0,extCost:0,purchase:0,directCost:0,indirect:0};
+  const invRev=(d.invoice||[]).reduce((s,r)=>s+num(r.amount),0);
+  return{
+    revenue:num(d.revenue)||invRev,
+    invoiceRev:invRev,
+    intCost:d.labor.reduce((s,r)=>s+num(r.intCost),0),
+    extCost:d.labor.reduce((s,r)=>s+num(r.extCost)+num(r.fee),0),
+    purchase:(d.purchase||[]).reduce((s,r)=>s+num(r.amount),0),
+    directCost:(d.expense||[]).reduce((s,r)=>s+num(r.amount),0),
+    indirect:num(d.indirect)
+  };
+}
+function totalCost(s){return s.intCost+s.extCost+s.purchase+s.directCost}
+function grossProfit(s){return s.revenue-totalCost(s)}
+function opProfit(s){return grossProfit(s)-s.indirect}
+
+// ===== TAB / NAV =====
+function showTab(id,el){
+  document.querySelectorAll('.pnl').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('pnl-'+id).classList.add('active');
+  el.classList.add('active');render();
+}
+function switchMonth(){curMonth=parseInt(document.getElementById('selMonth').value);render()}
+
+// ===== RENDER =====
+function render(){
+  const ml=curMonth+'월';
+  document.querySelectorAll('#laborMonthLabel,#invMonthLabel,#payMonthLabel,#purMonthLabel,#expMonthLabel').forEach(el=>el.textContent=ml);
+  renderDashboard();renderLabor();renderInvoice();renderPayment();renderPurchase();renderExpense();renderContract();
+}
+
+function renderDashboard(){
+  // Annual totals
+  const contractTotal=getContractTotal();
+  let annRev=0,annCost=0,annGross=0,annIndirect=0,annOp=0;
+  MONTHS.forEach(m=>{const s=calcSummary(m);annRev+=s.revenue;annCost+=totalCost(s);annGross+=grossProfit(s);annIndirect+=s.indirect;annOp+=opProfit(s)});
+  const revAch=TARGET_REVENUE?annRev/TARGET_REVENUE:0;
+  const opAch=TARGET_OP_PROFIT?annOp/TARGET_OP_PROFIT:0;
+  const cm=calcSummary(curMonth);
+
+  document.getElementById('summaryCards').innerHTML=`
+    <div class="card"><div class="lb">매출 목표</div><div class="vl blue">${fmtB(TARGET_REVENUE)}</div><div class="sub">연간 목표</div></div>
+    <div class="card" style="border-left:3px solid #ea580c"><div class="lb">누적 계약매출</div><div class="vl" style="color:#ea580c">${fmtB(contractTotal)}</div>
+      <div class="pbar"><div class="pbar-f" style="width:${Math.min((contractTotal/TARGET_REVENUE)*100,100)}%;background:#ea580c"></div></div>
+      <div class="sub">목표대비 ${pct(contractTotal,TARGET_REVENUE)}</div></div>
+    <div class="card"><div class="lb">누계 매출(월별)</div><div class="vl blue">${fmtB(annRev)}</div>
+      <div class="pbar"><div class="pbar-f" style="width:${Math.min(revAch*100,100)}%;background:var(--primary)"></div></div>
+      <div class="sub">달성률 ${pct(annRev,TARGET_REVENUE)}</div></div>
+    <div class="card"><div class="lb">영업이익 목표</div><div class="vl ${TARGET_OP_PROFIT>=0?'pos':'neg'}">${fmtB(TARGET_OP_PROFIT)}</div><div class="sub">연간 목표</div></div>
+    <div class="card"><div class="lb">누계 영업이익</div><div class="vl ${annOp>=0?'pos':'neg'}">${fmtB(annOp)}</div>
+      <div class="pbar"><div class="pbar-f" style="width:${Math.max(Math.min((annOp/TARGET_OP_PROFIT)*100,100),0)}%;background:${annOp>=0?'var(--ok)':'var(--err)'}"></div></div>
+      <div class="sub">달성률 ${pct(annOp,TARGET_OP_PROFIT)}</div></div>
+    <div class="card"><div class="lb">${curMonth}월 매출</div><div class="vl blue">${fmt(cm.revenue)}</div><div class="sub">당월 진행매출</div></div>
+    <div class="card"><div class="lb">${curMonth}월 매출총이익</div><div class="vl ${grossProfit(cm)>=0?'pos':'neg'}">${fmt(grossProfit(cm))}</div><div class="sub">당월 매출총이익</div></div>
+    <div class="card"><div class="lb">${curMonth}월 영업이익</div><div class="vl ${opProfit(cm)>=0?'pos':'neg'}">${fmt(opProfit(cm))}</div><div class="sub">당월 영업이익</div></div>
+    <div class="card"><div class="lb">누계 이익률</div><div class="vl ${annOp>=0?'pos':'neg'}">${annRev?((annOp/annRev)*100).toFixed(1)+'%':'-'}</div><div class="sub">영업이익/매출</div></div>
+  `;
+
+  // 12-month detail table
+  const monthlyRevTotal=MONTHS.reduce((s,m)=>s+num(data.months[m].revenue),0);
+  const totalSales=contractTotal+monthlyRevTotal;
+  const rows=[
+    {label:'누적 계약매출',get:()=>contractTotal,bold:true,isContract:true},
+    {label:'매출액(월별진행)',get:(s,m)=>num(data.months[m].revenue),bold:true,target:TARGET_REVENUE,useMonth:true},
+    {label:'  ↳ 목표대비 비중',getV:(s,m)=>num(data.months[m].revenue),base:TARGET_REVENUE,isTP:true,useMonth:true},
+    {label:'전체 매출(누적+월별)',get:()=>totalSales,bold:true,isTotalSales:true},
+    {label:'원가(합계)',get:s=>totalCost(s),bold:true},
+    {label:' - 내부인건비',get:s=>s.intCost},
+    {label:' - 외주인건비',get:s=>s.extCost},
+    {label:' - 매입',get:s=>s.purchase},
+    {label:' - 직접비',get:s=>s.directCost},
+    {label:'매출총이익',get:s=>grossProfit(s),bold:true},
+    {label:'이익률',get:s=>s.revenue?(grossProfit(s)/s.revenue):null,isPct:true},
+    {label:'간접비',get:s=>s.indirect},
+    {label:'영업이익',get:s=>opProfit(s),bold:true,target:TARGET_OP_PROFIT},
+    {label:'  ↳ 목표대비 비중',getV:s=>opProfit(s),base:TARGET_OP_PROFIT,isTP:true},
+    {label:'영업이익률',get:s=>s.revenue?(opProfit(s)/s.revenue):null,isPct:true}
+  ];
+
+  let h='<thead><tr><th style="min-width:120px;position:sticky;left:0;background:var(--g50);z-index:2">구분</th><th class="num tgt-col">목표</th>';
+  MONTHS.forEach(m=>h+=`<th class="num" style="${m===curMonth?'background:#dbeafe;color:#1e40af':''}">${m}월</th>`);
+  h+='<th class="num cum-col">누계</th><th class="num ach-col">달성률</th></tr></thead><tbody>';
+
+  rows.forEach(row=>{
+    const tp=row.isTP;
+    const ct=row.isContract;
+    const ts=row.isTotalSales;
+    h+=`<tr style="${ts?'font-weight:700;background:#ecfdf5;border-top:2px solid #059669':row.bold?(ct?'font-weight:700;background:#fff7ed':'font-weight:700;background:#fafafa'):tp?'background:#f5f3ff':''}">`;
+    h+=`<td style="position:sticky;left:0;background:${ts?'#ecfdf5':ct?'#fff7ed':row.bold?'#fafafa':tp?'#f5f3ff':'#fff'};z-index:1;${tp?'color:#6d28d9;font-size:11px':''}${ct?';color:#c2410c':''}${ts?';color:#047857':''}">${row.label}</td>`;
+    if(ts){
+      // 전체 매출(누적+월별): 월별 셀은 비우고 누계/달성률만 표시
+      h+=`<td class="tgt">${fmt(TARGET_REVENUE)}</td>`;
+      MONTHS.forEach(()=>h+=`<td class="num" style="background:#ecfdf5;color:var(--g300);text-align:center;font-size:11px">-</td>`);
+      const tv=row.get();
+      h+=`<td class="calc" style="background:#a7f3d0;color:#047857;font-size:14px">${fmt(tv)}</td>`;
+      h+=`<td class="num" style="background:#d1fae5;font-weight:700;color:#047857;font-size:14px">${pct(tv,TARGET_REVENUE)}</td>`;
+    }else if(ct){
+      // 누적 계약매출: 월별 셀은 비우고 누계/달성률만 표시
+      h+=`<td class="tgt">${fmt(TARGET_REVENUE)}</td>`;
+      MONTHS.forEach(()=>h+=`<td class="num" style="background:#fff7ed;color:var(--g300);text-align:center;font-size:11px">-</td>`);
+      const cv=row.get();
+      h+=`<td class="calc" style="background:#fed7aa;color:#c2410c">${fmt(cv)}</td>`;
+      h+=`<td class="num" style="background:#ffedd5;font-weight:600;color:#c2410c">${pct(cv,TARGET_REVENUE)}</td>`;
+    }else if(row.target){
+      h+=`<td class="tgt">${fmt(row.target)}</td>`;
+      let cumul=0;
+      MONTHS.forEach(m=>{const s=calcSummary(m);const v=row.get(s,m);cumul+=v;
+        h+=`<td class="num ${v<0?'neg':''}" style="${m===curMonth?'background:#eff6ff':''}">${fmt(v)}</td>`});
+      h+=`<td class="calc ${cumul<0?'neg':''}">${fmt(cumul)}</td>`;
+      h+=`<td class="num" style="background:#d1fae5;font-weight:600;color:var(--ok)">${pct(cumul,row.target)}</td>`;
+    }else if(tp){
+      h+=`<td style="background:#f5f3ff;text-align:right;font-size:10px;color:#6d28d9;padding:7px 10px">월 ${(100/12).toFixed(1)}%</td>`;
+      let cumul=0;
+      MONTHS.forEach(m=>{const s=calcSummary(m);const v=row.getV(s,m);cumul+=v;
+        const p=row.base?(v/row.base*100):0;const noData=(v===0&&s.revenue===0);
+        const clr=noData?'var(--g400)':v<0?'#dc2626':p>=(100/12*0.7)?'#059669':'#d97706';
+        h+=`<td class="num" style="background:${m===curMonth?'#ede9fe':'#f5f3ff'};color:${clr};font-size:11px">${noData?'-':p.toFixed(1)+'%'}</td>`});
+      const p=row.base?(cumul/row.base*100):0;
+      h+=`<td class="calc" style="background:#ede9fe;color:#6d28d9;font-size:11px">${p.toFixed(1)}%</td><td style="background:#f5f3ff;text-align:right;padding:7px 10px">-</td>`;
+    }else if(row.isPct){
+      h+=`<td class="tgt">-</td>`;
+      MONTHS.forEach(m=>{const s=calcSummary(m);const v=row.get(s);
+        h+=`<td class="num" style="${m===curMonth?'background:#eff6ff':''}">${v!==null?((v*100).toFixed(1)+'%'):'-'}</td>`});
+      const allS=MONTHS.map(m=>calcSummary(m));const totRev=allS.reduce((a,s)=>a+s.revenue,0);
+      let ratio=null;
+      if(row.label==='이익률'){ratio=totRev?allS.reduce((a,s)=>a+grossProfit(s),0)/totRev:null}
+      else{ratio=totRev?allS.reduce((a,s)=>a+opProfit(s),0)/totRev:null}
+      h+=`<td class="calc">${ratio!==null?((ratio*100).toFixed(1)+'%'):'-'}</td><td class="num">-</td>`;
+    }else{
+      h+=`<td class="tgt">-</td>`;
+      let cumul=0;
+      MONTHS.forEach(m=>{const s=calcSummary(m);const v=row.get(s);cumul+=v;
+        h+=`<td class="num ${v<0?'neg':''}" style="${m===curMonth?'background:#eff6ff':''}">${fmt(v)}</td>`});
+      h+=`<td class="calc ${cumul<0?'neg':''}">${fmt(cumul)}</td>`;
+      h+=`<td class="num" style="background:#d1fae5;font-weight:600;color:var(--g500)">-</td>`;
+    }
+    h+='</tr>';
+  });
+  h+='</tbody>';
+  document.getElementById('detailTable').innerHTML=h;
+
+  // Revenue input section (auto + manual + effective)
+  let rh='<thead><tr><th style="min-width:120px">항목</th>';
+  MONTHS.forEach(m=>rh+=`<th class="num" style="${m===curMonth?'background:#dbeafe':''}">${m}월</th>`);
+  rh+='<th class="num cum-col">누계</th></tr></thead><tbody>';
+  // Row 1: 발행매출 (자동 from invoices)
+  rh+='<tr style="background:#f0fdf4"><td style="font-size:12px"><strong style="color:#059669">&#128203; 발행매출</strong><div style="font-size:10px;color:var(--g400)">세금계산서 자동합산</div></td>';
+  let invTot=0;
+  MONTHS.forEach(m=>{const iv=(data.months[m].invoice||[]).reduce((s,r)=>s+num(r.amount),0);invTot+=iv;
+    rh+=`<td class="num" style="font-size:11px;color:#059669;${m===curMonth?'background:#dcfce7':''}">${iv?fmt(iv):'-'}</td>`});
+  rh+=`<td class="calc" style="color:#059669">${fmt(invTot)}</td></tr>`;
+  // Row 2: 진행매출 (수동 override)
+  rh+='<tr><td style="font-size:12px"><strong>&#9999;&#65039; 진행매출</strong><div style="font-size:10px;color:var(--g400)">수동입력 (미입력시 자동적용)</div></td>';
+  MONTHS.forEach(m=>{const d2=data.months[m];const iv=(d2.invoice||[]).reduce((s,r)=>s+num(r.amount),0);
+    rh+=`<td class="num"><input class="rev-input" value="${d2.revenue?fmt(d2.revenue):''}" onchange="saveRevenue(${m},this.value)" placeholder="${iv?fmt(iv):'0'}" style="${m===curMonth?'border-color:var(--primary)':''}"></td>`});
+  let effTot=0;MONTHS.forEach(m=>{effTot+=calcSummary(m).revenue});
+  rh+=`<td class="calc">${fmt(effTot)}</td></tr>`;
+  // Row 3: 적용매출 (effective)
+  rh+='<tr style="background:#eff6ff"><td style="font-size:12px"><strong style="color:var(--primary)">&#128200; 적용매출</strong><div style="font-size:10px;color:var(--g400)">대시보드 반영값</div></td>';
+  MONTHS.forEach(m=>{const s2=calcSummary(m);const isM=num(data.months[m].revenue)>0;
+    rh+=`<td class="num" style="font-weight:600;font-size:11px;color:var(--primary);${m===curMonth?'background:#dbeafe':''}">${s2.revenue?fmt(s2.revenue):'-'}<div style="font-size:9px;color:${isM?'var(--g400)':'#059669'};font-weight:normal">${s2.revenue?(isM?'수동':'자동'):''}</div></td>`});
+  rh+=`<td class="calc" style="font-weight:700">${fmt(effTot)}</td></tr>`;
+  rh+='</tbody>';
+  document.getElementById('revenueTable').innerHTML=rh;
+
+  // Project cost table (current month)
+  document.getElementById('projectTitle').textContent='선택월('+curMonth+'월) 프로젝트별 원가 현황';
+  const d=md();const projMap={};
+  (d.labor||[]).forEach(r=>{
+    if(r.type==='공통'||r.type==='제안'||r.type==='유휴')return;
+    if(!projMap[r.project])projMap[r.project]={intCost:0,extCost:0,directCost:0};
+    projMap[r.project].intCost+=num(r.intCost);projMap[r.project].extCost+=num(r.extCost)+num(r.fee);
+  });
+  (d.expense||[]).forEach(r=>{if(!projMap[r.project])projMap[r.project]={intCost:0,extCost:0,directCost:0};projMap[r.project].directCost+=num(r.amount)});
+  let pH='';
+  Object.keys(projMap).forEach(p=>{const pr=projMap[p];const tc=pr.intCost+pr.extCost+pr.directCost;
+    pH+=`<tr><td>${p}</td><td class="num">${fmt(pr.intCost)}</td><td class="num">${fmt(pr.extCost)}</td><td class="num">${fmt(pr.directCost)}</td><td class="num bold">${fmt(tc)}</td></tr>`});
+  if(!pH)pH='<tr><td colspan="5" class="empty">프로젝트 데이터가 없습니다.</td></tr>';
+  document.getElementById('projectBody').innerHTML=pH;
+
+  // ===== 리스크/이슈 자동 감지 =====
+  const issues=[];
+  const mRevT=TARGET_REVENUE/12,mOpT=TARGET_OP_PROFIT/12;
+  MONTHS.forEach(m=>{
+    const s=calcSummary(m);
+    if(s.revenue===0&&totalCost(s)===0)return;
+    const op=opProfit(s),gp=grossProfit(s);
+    const costR=s.revenue?totalCost(s)/s.revenue:0;
+    // 영업이익 적자
+    if(op<0)issues.push({lv:'r',cat:'영업손실',msg:`${m}월 영업이익 적자 발생`,val:fmt(op)+'원'});
+    else if(s.revenue>0&&mOpT>0&&op<mOpT*0.5)issues.push({lv:'y',cat:'이익부진',msg:`${m}월 영업이익이 월목표(${fmtB(mOpT)})의 ${(op/mOpT*100).toFixed(0)}%`,val:fmt(op)+'원'});
+    // 원가율
+    if(s.revenue>0&&costR>0.9)issues.push({lv:'r',cat:'원가율',msg:`${m}월 원가율 ${(costR*100).toFixed(1)}% — 수익성 위험`,val:(costR*100).toFixed(1)+'%'});
+    else if(s.revenue>0&&costR>0.8)issues.push({lv:'y',cat:'원가율',msg:`${m}월 원가율 ${(costR*100).toFixed(1)}% — 주의`,val:(costR*100).toFixed(1)+'%'});
+    // 외주 의존도
+    if(s.extCost>s.intCost&&s.extCost>0){
+      const er=(s.extCost/(s.intCost+s.extCost)*100).toFixed(0);
+      issues.push({lv:'y',cat:'외주의존',msg:`${m}월 외주비 비중 ${er}% (내부인건비 초과)`,val:fmt(s.extCost)+'원'});
+    }
+    // 간접비 과다
+    if(s.revenue>0&&s.indirect/s.revenue>0.2)issues.push({lv:'y',cat:'간접비',msg:`${m}월 간접비 비중 ${(s.indirect/s.revenue*100).toFixed(1)}% (매출대비 과다)`,val:fmt(s.indirect)+'원'});
+    // 프로젝트 집중 리스크
+    const md2=data.months[m],pc={};
+    (md2.labor||[]).forEach(r=>{if(r.type==='프로젝트'){if(!pc[r.project])pc[r.project]=0;pc[r.project]+=num(r.intCost)+num(r.extCost)+num(r.fee)}});
+    const tc=totalCost(s);
+    Object.entries(pc).forEach(([p,c])=>{if(tc>0&&c/tc>0.5){const pn=p.length>18?p.substring(0,15)+'...':p;issues.push({lv:'y',cat:'집중리스크',msg:`${m}월 '${pn}' 원가비중 ${(c/tc*100).toFixed(0)}%`,val:fmt(c)+'원'})}});
+  });
+  // 연간 누계 체크
+  let aR2=0,aO2=0;MONTHS.forEach(m=>{const s=calcSummary(m);aR2+=s.revenue;aO2+=opProfit(s)});
+  if(aR2>0&&aR2/TARGET_REVENUE<curMonth/12*0.8)issues.unshift({lv:'r',cat:'매출부진',msg:`누계 매출 달성률 ${(aR2/TARGET_REVENUE*100).toFixed(1)}%로 기대치(${(curMonth/12*100).toFixed(0)}%) 대비 부진`,val:fmtB(aR2)});
+  if(aO2<0)issues.unshift({lv:'r',cat:'누계적자',msg:`연간 누계 영업이익 적자`,val:fmt(aO2)+'원'});
+
+  let rhtml='<div class="tbl-wrap"><div class="tbar"><h3>리스크 / 이슈 분석</h3><div style="font-size:11px;color:var(--g400)">비용 및 수익성 자동 감지</div></div><div style="padding:12px">';
+  if(issues.length>0){
+    const crit=issues.filter(i=>i.lv==='r'),warn=issues.filter(i=>i.lv==='y');
+    rhtml+='<div class="risk-wrap">';
+    if(crit.length>0){
+      rhtml+='<div class="risk-box danger"><div class="risk-hdr dg">&#9888;&#65039; 리스크 ('+crit.length+'건)</div>';
+      crit.forEach(i=>rhtml+=`<div class="risk-row"><span class="rb rb-r">${i.cat}</span><span class="risk-msg">${i.msg}</span><span class="risk-val" style="color:#dc2626">${i.val}</span></div>`);
+      rhtml+='</div>';
+    }
+    if(warn.length>0){
+      rhtml+='<div class="risk-box warn"><div class="risk-hdr wn">&#9889; 이슈/주의 ('+warn.length+'건)</div>';
+      warn.forEach(i=>rhtml+=`<div class="risk-row"><span class="rb rb-y">${i.cat}</span><span class="risk-msg">${i.msg}</span><span class="risk-val" style="color:#d97706">${i.val}</span></div>`);
+      rhtml+='</div>';
+    }
+    rhtml+='</div>';
+  }else{
+    rhtml+='<div style="text-align:center;padding:16px;color:var(--ok);font-weight:600">&#10003; 현재 식별된 리스크/이슈가 없습니다</div>';
+  }
+  rhtml+='</div></div>';
+  document.getElementById('riskSection').innerHTML=rhtml;
+}
+
+function saveRevenue(m,val){data.months[m].revenue=parseNum(val);save();render()}
+
+function renderStrip(type,cid,sumFn,cntFn){
+  let h='<div class="mstrip">';
+  MONTHS.forEach(m=>{const d=data.months[m];const cnt=cntFn(d);const sm=sumFn(d);
+    const cls=m===curMonth?'mchip cur':cnt>0?'mchip has':'mchip';
+    h+=`<div class="${cls}" onclick="curMonth=${m};document.getElementById('selMonth').value=${m};render()" title="${m}월: ${cnt}건, ${fmtB(sm)}">${m}월`;
+    if(cnt>0)h+=` <b>(${cnt})</b>`;h+='</div>'});
+  h+='</div>';document.getElementById(cid).innerHTML=h;
+}
+function setView(type,all){
+  viewMode[type]=all;
+  const vt=document.getElementById(type+'Vtog');
+  if(vt){vt.children[0].className=all?'':'active';vt.children[1].className=all?'active':''}
+  render();
+}
+
+function renderLabor(){
+  renderStrip('labor','laborStrip',d=>(d.labor||[]).reduce((s,r)=>s+num(r.intCost)+num(r.extCost)+num(r.fee),0),d=>(d.labor||[]).length);
+  const all=viewMode.labor, months=all?MONTHS.filter(m=>(data.months[m].labor||[]).length>0):[curMonth];
+  const cols=all?9:8;let h='<thead><tr>';if(all)h+='<th>월</th>';
+  h+='<th>구분</th><th>프로젝트</th><th class="num">내부 인원</th><th class="num">내부 인건비</th><th class="num">외주 인원</th><th class="num">외주 인건비</th><th class="num">중개수수료</th><th></th></tr></thead><tbody>';
+  let tIP=0,tIC=0,tEP=0,tEC=0,tF=0,cnt=0;
+  months.forEach(m=>{const arr=data.months[m].labor||[];
+    if(all&&arr.length>0)h+=`<tr class="grp-hdr"><td colspan="${cols}">${m}월 (${arr.length}건)</td></tr>`;
+    arr.forEach((r,i)=>{tIP+=num(r.intPerson);tIC+=num(r.intCost);tEP+=num(r.extPerson);tEC+=num(r.extCost);tF+=num(r.fee);cnt++;
+      h+='<tr>';if(all)h+=`<td>${m}월</td>`;
+      h+=`<td><span style="padding:2px 8px;border-radius:4px;font-size:11px;background:${r.type==='공통'?'#ede9fe':r.type==='제안'?'#fef3c7':'#dbeafe'};color:${r.type==='공통'?'#6d28d9':r.type==='제안'?'#92400e':'#1e40af'}">${r.type}</span></td>`;
+      h+=`<td>${r.project}</td><td class="num">${r.intPerson||0}</td><td class="num">${fmt(r.intCost)}</td><td class="num">${r.extPerson||0}</td><td class="num">${fmt(r.extCost)}</td><td class="num">${fmt(r.fee)}</td>`;
+      h+=`<td><button class="btn btn-s" style="padding:3px 7px;font-size:11px" onclick="editRow('labor',${i},${m})">수정</button> <button class="btn btn-err" style="padding:3px 7px;font-size:11px" onclick="delRow('labor',${i},${m})">삭제</button></td></tr>`})});
+  if(!cnt)h+=`<tr><td colspan="${cols}" class="empty">인건비 데이터를 추가하세요.</td></tr>`;
+  h+='</tbody><tfoot><tr style="font-weight:700;background:var(--g50)">';if(all)h+='<td></td>';
+  h+=`<td colspan="2">${all?'전체 ':''} 합계</td><td class="num">${tIP.toFixed(1)}</td><td class="num">${fmt(tIC)}</td><td class="num">${tEP.toFixed(1)}</td><td class="num">${fmt(tEC)}</td><td class="num">${fmt(tF)}</td><td></td></tr></tfoot>`;
+  document.getElementById('laborTable').innerHTML=h;
+}
+function renderInvoice(){
+  renderStrip('invoice','invoiceStrip',d=>(d.invoice||[]).reduce((s,r)=>s+num(r.amount),0),d=>(d.invoice||[]).length);
+  const all=viewMode.invoice, months=all?MONTHS.filter(m=>(data.months[m].invoice||[]).length>0):[curMonth];
+  const cols=all?9:8;let h='<thead><tr>';if(all)h+='<th>월</th>';
+  h+='<th>구분</th><th>발행일자</th><th>거래처</th><th>사업자번호</th><th>품명</th><th class="num">공급가액</th><th>부서명</th><th></th></tr></thead><tbody>';
+  let t=0,cnt=0;
+  months.forEach(m=>{const arr=data.months[m].invoice||[];
+    if(all&&arr.length>0)h+=`<tr class="grp-hdr"><td colspan="${cols}">${m}월 (${arr.length}건)</td></tr>`;
+    arr.forEach((r,i)=>{t+=num(r.amount);cnt++;h+='<tr>';if(all)h+=`<td>${m}월</td>`;
+      h+=`<td>${r.type}</td><td>${r.date}</td><td>${r.client}</td><td>${r.bizNo}</td><td>${r.item}</td><td class="num">${fmt(r.amount)}</td><td>${r.dept}</td>`;
+      h+=`<td><button class="btn btn-s" style="padding:3px 7px;font-size:11px" onclick="editRow('invoice',${i},${m})">수정</button> <button class="btn btn-err" style="padding:3px 7px;font-size:11px" onclick="delRow('invoice',${i},${m})">삭제</button></td></tr>`})});
+  if(!cnt)h+=`<tr><td colspan="${cols}" class="empty">매출 데이터를 추가하세요.</td></tr>`;
+  h+='</tbody><tfoot><tr style="font-weight:700;background:var(--g50)">';if(all)h+='<td></td>';
+  h+=`<td colspan="5">합계</td><td class="num">${fmt(t)}</td><td colspan="2"></td></tr></tfoot>`;
+  document.getElementById('invoiceTable').innerHTML=h;
+}
+function renderPayment(){
+  renderStrip('payment','paymentStrip',d=>(d.payment||[]).reduce((s,r)=>s+num(r.amount),0),d=>(d.payment||[]).length);
+  const all=viewMode.payment, months=all?MONTHS.filter(m=>(data.months[m].payment||[]).length>0):[curMonth];
+  const cols=all?8:7;let h='<thead><tr>';if(all)h+='<th>월</th>';
+  h+='<th>구분</th><th>입금일자</th><th>거래처</th><th>품명</th><th class="num">입금액</th><th>부서명</th><th></th></tr></thead><tbody>';
+  let t=0,cnt=0;
+  months.forEach(m=>{const arr=data.months[m].payment||[];
+    if(all&&arr.length>0)h+=`<tr class="grp-hdr"><td colspan="${cols}">${m}월 (${arr.length}건)</td></tr>`;
+    arr.forEach((r,i)=>{t+=num(r.amount);cnt++;h+='<tr>';if(all)h+=`<td>${m}월</td>`;
+      h+=`<td>${r.type||'입금'}</td><td>${r.date||''}</td><td>${r.client||''}</td><td>${r.item||''}</td><td class="num">${fmt(r.amount)}</td><td>${r.dept||DEPT}</td>`;
+      h+=`<td><button class="btn btn-s" style="padding:3px 7px;font-size:11px" onclick="editRow('payment',${i},${m})">수정</button> <button class="btn btn-err" style="padding:3px 7px;font-size:11px" onclick="delRow('payment',${i},${m})">삭제</button></td></tr>`})});
+  if(!cnt)h+=`<tr><td colspan="${cols}" class="empty">입금 데이터를 추가하세요.</td></tr>`;
+  h+='</tbody><tfoot><tr style="font-weight:700;background:var(--g50)">';if(all)h+='<td></td>';
+  h+=`<td colspan="4">합계</td><td class="num">${fmt(t)}</td><td colspan="2"></td></tr></tfoot>`;
+  document.getElementById('paymentTable').innerHTML=h;
+}
+function renderPurchase(){
+  renderStrip('purchase','purchaseStrip',d=>(d.purchase||[]).reduce((s,r)=>s+num(r.amount),0),d=>(d.purchase||[]).length);
+  const all=viewMode.purchase, months=all?MONTHS.filter(m=>(data.months[m].purchase||[]).length>0):[curMonth];
+  const cols=all?9:8;let h='<thead><tr>';if(all)h+='<th>월</th>';
+  h+='<th>구분</th><th>발행일자</th><th>거래처</th><th>사업자번호</th><th>품명</th><th class="num">공급가액</th><th>부서명</th><th></th></tr></thead><tbody>';
+  let t=0,cnt=0;
+  months.forEach(m=>{const arr=data.months[m].purchase||[];
+    if(all&&arr.length>0)h+=`<tr class="grp-hdr"><td colspan="${cols}">${m}월 (${arr.length}건)</td></tr>`;
+    arr.forEach((r,i)=>{t+=num(r.amount);cnt++;h+='<tr>';if(all)h+=`<td>${m}월</td>`;
+      h+=`<td>${r.type||''}</td><td>${r.date||''}</td><td>${r.client||''}</td><td>${r.bizNo||''}</td><td>${r.item||''}</td><td class="num">${fmt(r.amount)}</td><td>${r.dept||DEPT}</td>`;
+      h+=`<td><button class="btn btn-s" style="padding:3px 7px;font-size:11px" onclick="editRow('purchase',${i},${m})">수정</button> <button class="btn btn-err" style="padding:3px 7px;font-size:11px" onclick="delRow('purchase',${i},${m})">삭제</button></td></tr>`})});
+  if(!cnt)h+=`<tr><td colspan="${cols}" class="empty">매입 데이터를 추가하세요.</td></tr>`;
+  h+='</tbody><tfoot><tr style="font-weight:700;background:var(--g50)">';if(all)h+='<td></td>';
+  h+=`<td colspan="5">합계</td><td class="num">${fmt(t)}</td><td colspan="2"></td></tr></tfoot>`;
+  document.getElementById('purchaseTable').innerHTML=h;
+}
+function renderExpense(){
+  renderStrip('expense','expenseStrip',d=>(d.expense||[]).reduce((s,r)=>s+num(r.amount),0),d=>(d.expense||[]).length);
+  const all=viewMode.expense, months=all?MONTHS.filter(m=>(data.months[m].expense||[]).length>0):[curMonth];
+  const cols=all?6:5;let h='<thead><tr>';if(all)h+='<th>월</th>';
+  h+='<th>구분</th><th>내용</th><th>프로젝트</th><th class="num">금액</th><th></th></tr></thead><tbody>';
+  let t=0,cnt=0;
+  months.forEach(m=>{const arr=data.months[m].expense||[];
+    if(all&&arr.length>0)h+=`<tr class="grp-hdr"><td colspan="${cols}">${m}월 (${arr.length}건)</td></tr>`;
+    arr.forEach((r,i)=>{t+=num(r.amount);cnt++;h+='<tr>';if(all)h+=`<td>${m}월</td>`;
+      h+=`<td>${r.type}</td><td>${r.desc}</td><td>${r.project}</td><td class="num">${fmt(r.amount)}</td>`;
+      h+=`<td><button class="btn btn-s" style="padding:3px 7px;font-size:11px" onclick="editRow('expense',${i},${m})">수정</button> <button class="btn btn-err" style="padding:3px 7px;font-size:11px" onclick="delRow('expense',${i},${m})">삭제</button></td></tr>`})});
+  if(!cnt)h+=`<tr><td colspan="${cols}" class="empty">비용 데이터를 추가하세요.</td></tr>`;
+  h+='</tbody><tfoot><tr style="font-weight:700;background:var(--g50)">';if(all)h+='<td></td>';
+  h+=`<td colspan="3">합계</td><td class="num">${fmt(t)}</td><td></td></tr></tfoot>`;
+  document.getElementById('expenseTable').innerHTML=h;
+  document.getElementById('indirectCost').value=fmt(md().indirect||0);
+}
+function saveIndirect(){md().indirect=parseNum(document.getElementById('indirectCost').value);save();render()}
+
+function getContractTotal(){return(data.contractSales||[]).reduce((s,r)=>s+num(r.amount),0)}
+
+function renderContract(){
+  const arr=data.contractSales||[];
+  const total=getContractTotal();
+  const pctVal=TARGET_REVENUE?(total/TARGET_REVENUE*100).toFixed(1)+'%':'-';
+  document.getElementById('contractTargetInfo').innerHTML=`매출목표 대비 <b style="color:var(--primary)">${pctVal}</b> (${fmtB(total)} / ${fmtB(TARGET_REVENUE)})`;
+  let h='<thead><tr><th style="width:50px">No</th><th>프로젝트</th><th class="num">2026 계약매출</th><th class="num">목표대비</th><th style="width:120px"></th></tr></thead><tbody>';
+  if(!arr.length)h+='<tr><td colspan="5" class="empty">누적 매출 데이터를 추가하세요.</td></tr>';
+  arr.forEach((r,i)=>{
+    const rPct=TARGET_REVENUE?((num(r.amount)/TARGET_REVENUE)*100).toFixed(1)+'%':'-';
+    h+=`<tr><td style="text-align:center">${i+1}</td><td>${r.project}</td><td class="num">${fmt(r.amount)}</td><td class="num" style="color:var(--primary)">${rPct}</td>`;
+    h+=`<td><button class="btn btn-s" style="padding:3px 7px;font-size:11px" onclick="editRow('contract',${i})">수정</button> <button class="btn btn-err" style="padding:3px 7px;font-size:11px" onclick="delRow('contract',${i})">삭제</button></td></tr>`});
+  h+=`</tbody><tfoot><tr style="font-weight:700;background:var(--g50)"><td></td><td>합 계</td><td class="num" style="color:var(--err);font-size:14px">\u20A9${fmt(total)}</td><td class="num" style="color:var(--primary);font-weight:700">${pctVal}</td><td></td></tr></tfoot>`;
+  document.getElementById('contractTable').innerHTML=h;
+}
+
+// ===== MODAL =====
+const modalDefs={
+  labor:{title:'인건비',fields:[{id:'type',label:'구분',type:'select',opts:['프로젝트','공통','제안','유휴']},{id:'project',label:'프로젝트',type:'text'},{id:'intPerson',label:'내부 인원',type:'number'},{id:'intCost',label:'내부 인건비',type:'number'},{id:'extPerson',label:'외주 인원',type:'number'},{id:'extCost',label:'외주 인건비',type:'number'},{id:'fee',label:'중개수수료',type:'number'}]},
+  invoice:{title:'매출세금계산서',fields:[{id:'type',label:'구분',type:'select',opts:['매출']},{id:'date',label:'발행일자',type:'date'},{id:'client',label:'거래처',type:'text'},{id:'bizNo',label:'사업자번호',type:'text'},{id:'item',label:'품명',type:'text'},{id:'amount',label:'공급가액',type:'number'},{id:'dept',label:'부서명',type:'text',default:DEPT}]},
+  payment:{title:'입금',fields:[{id:'type',label:'구분',type:'select',opts:['입금']},{id:'date',label:'입금일자',type:'date'},{id:'client',label:'거래처',type:'text'},{id:'item',label:'품명',type:'text'},{id:'amount',label:'입금액',type:'number'},{id:'dept',label:'부서명',type:'text',default:DEPT}]},
+  purchase:{title:'매입(턴키)',fields:[{id:'type',label:'구분',type:'select',opts:['매입']},{id:'date',label:'발행일자',type:'date'},{id:'client',label:'거래처',type:'text'},{id:'bizNo',label:'사업자번호',type:'text'},{id:'item',label:'품명',type:'text'},{id:'amount',label:'공급가액',type:'number'},{id:'dept',label:'부서명',type:'text',default:DEPT}]},
+  expense:{title:'직접비',fields:[{id:'type',label:'구분',type:'text'},{id:'desc',label:'내용',type:'text'},{id:'project',label:'프로젝트',type:'text'},{id:'amount',label:'금액',type:'number'}]},
+  contract:{title:'누적 매출',fields:[{id:'project',label:'프로젝트',type:'text'},{id:'amount',label:'2026 계약매출',type:'number'}]}
+};
+function openModal(type,editData){
+  curModalType=type;const def=modalDefs[type];
+  document.getElementById('moTitle').textContent=(curEditIdx>=0?'수정':'추가')+': '+def.title;
+  let h='';
+  def.fields.forEach(f=>{h+=`<div class="fg"><label>${f.label}</label>`;
+    if(f.type==='select'){h+=`<select id="mf_${f.id}">${f.opts.map(o=>`<option value="${o}" ${editData&&editData[f.id]===o?'selected':''}>${o}</option>`).join('')}</select>`}
+    else if(f.type==='number'){h+=`<input type="text" id="mf_${f.id}" value="${editData&&editData[f.id]!=null?editData[f.id]:''}" placeholder="숫자" style="text-align:right">`}
+    else if(f.type==='date'){h+=`<input type="date" id="mf_${f.id}" value="${editData?editData[f.id]||'':''}">`}
+    else{h+=`<input type="text" id="mf_${f.id}" value="${editData?editData[f.id]||'':f.default||''}" placeholder="${f.label}">`}
+    h+='</div>'});
+  document.getElementById('moBody').innerHTML=h;
+  document.getElementById('modal').classList.add('show');
+}
+function closeModal(){document.getElementById('modal').classList.remove('show');curEditIdx=-1;curEditMonth=null;
+  const ma=document.querySelector('#modal > .mo-c > .ma');if(ma)ma.style.display=''}
+function saveModal(){
+  const def=modalDefs[curModalType];const obj={};
+  def.fields.forEach(f=>{const el=document.getElementById('mf_'+f.id);obj[f.id]=f.type==='number'?parseNum(el.value):el.value});
+  if(curModalType==='contract'){
+    if(!data.contractSales)data.contractSales=[];
+    if(curEditIdx>=0)data.contractSales[curEditIdx]=obj;else data.contractSales.push(obj);
+  }else{
+    const tgt=data.months[curEditMonth||curMonth];
+    if(!tgt[curModalType])tgt[curModalType]=[];
+    if(curEditIdx>=0)tgt[curModalType][curEditIdx]=obj;else tgt[curModalType].push(obj);
+  }
+  save();closeModal();render();
+}
+function editRow(type,idx,m){curEditIdx=idx;curEditMonth=m||curMonth;
+  if(type==='contract')openModal(type,data.contractSales[idx]);
+  else openModal(type,data.months[curEditMonth][type][idx])}
+function delRow(type,idx,m){if(!confirm('삭제하시겠습니까?'))return;
+  if(type==='contract'){data.contractSales.splice(idx,1)}
+  else{const tm=m||curMonth;data.months[tm][type].splice(idx,1)}
+  save();render()}
+
+// ===== EXCEL =====
+function downloadExcel(){
+  const wb=XLSX.utils.book_new();
+  const sums=MONTHS.map(m=>calcSummary(m));
+  const MC=MONTHS.map(m=>String.fromCharCode(65+m)); // B~M
+  const cumCol=String.fromCharCode(65+13); // N
+  const achCol=String.fromCharCode(65+14); // O
+
+  // Sheet 1: 월별_손익_요약
+  const contractTotal=(data.contractSales||[]).reduce((s,r)=>s+num(r.amount),0);
+  const monthlyRevTotal2=MONTHS.reduce((s,m)=>s+num(data.months[m].revenue),0);
+  const h1=[['컨버전스 2본부 2026년 월별 손익 현황','','','','','','','','','','','','','','',''],
+    ['','','','','','','','','','','','','','','','(단위: 원, 진행매출 기준)'],
+    [],
+    ['구분','목표','1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월','누계','달성률']
+  ];
+  // 누적 계약매출 행
+  const contractRow=['누적 계약매출',TARGET_REVENUE,...MONTHS.map(()=>''),contractTotal,null];
+  h1.push(contractRow);
+  // 데이터 행 정의
+  const rowDefs=[
+    {label:'매출액(월별진행)',get:m=>num(data.months[m].revenue),target:TARGET_REVENUE},
+    {label:'원가(합계)',get:m=>totalCost(sums[m-1])},
+    {label:' - 내부인건비',get:m=>sums[m-1].intCost},
+    {label:' - 외주인건비',get:m=>sums[m-1].extCost},
+    {label:' - 매입',get:m=>sums[m-1].purchase},
+    {label:' - 직접비',get:m=>sums[m-1].directCost},
+    {label:'매출총이익',get:m=>grossProfit(sums[m-1])},
+    {label:'이익률',get:m=>{const s=sums[m-1];return s.revenue?(grossProfit(s)/s.revenue):null},isPct:true},
+    {label:'간접비',get:m=>sums[m-1].indirect},
+    {label:'영업이익',get:m=>opProfit(sums[m-1]),target:TARGET_OP_PROFIT},
+    {label:'영업이익률',get:m=>{const s=sums[m-1];return s.revenue?(opProfit(s)/s.revenue):null},isPct:true}
+  ];
+  rowDefs.forEach(rd=>{
+    const row=[rd.label,rd.target||null,...MONTHS.map(m=>rd.get(m)),null,null];
+    h1.push(row);
+  });
+  // 전체 매출(누적+월별) 행
+  const totalSalesRow=['전체 매출(누적+월별)',TARGET_REVENUE,...MONTHS.map(()=>''),contractTotal+monthlyRevTotal2,null];
+  h1.push(totalSalesRow);
+
+  const ws1=XLSX.utils.aoa_to_sheet(h1);
+  const hdrRowCount=4; // 타이틀(1)+단위(2)+빈줄(3)+헤더(4)
+  const contractExcelRow=hdrRowCount+1; // 누적 계약매출 = row 5
+  // 누적 계약매출: 달성률 수식
+  ws1[XLSX.utils.encode_cell({r:contractExcelRow-1,c:15})]={t:'n',f:`IF(B${contractExcelRow}=0,"-",O${contractExcelRow}/B${contractExcelRow})`};
+  // 데이터 행 수식
+  rowDefs.forEach((rd,ri)=>{
+    const r=contractExcelRow+1+ri; // Excel row (1-indexed)
+    if(rd.isPct){
+      // 이익률: 누계는 전체 합산 기반으로 계산
+      const revRow=contractExcelRow+1; // 매출액 행
+      const valRow=r;
+      // 이익률/영업이익률은 월별 값이 이미 비율이므로 누계는 별도 계산
+      if(rd.label==='이익률'){
+        ws1[XLSX.utils.encode_cell({r:r-1,c:14})]={t:'n',f:`IF(O${revRow}=0,"-",O${revRow+6}/O${revRow})`}; // 매출총이익누계/매출액누계
+      }else{
+        ws1[XLSX.utils.encode_cell({r:r-1,c:14})]={t:'n',f:`IF(O${revRow}=0,"-",O${revRow+9}/O${revRow})`}; // 영업이익누계/매출액누계
+      }
+    }else{
+      // 일반 행: SUM으로 누계 계산
+      ws1[XLSX.utils.encode_cell({r:r-1,c:14})]={t:'n',f:`SUM(C${r}:N${r})`};
+    }
+    // 달성률: 목표가 있는 행에만 적용
+    if(rd.target){
+      ws1[XLSX.utils.encode_cell({r:r-1,c:15})]={t:'n',f:`IF(B${r}=0,"-",O${r}/B${r})`};
+    }
+  });
+  // 전체 매출 행: 달성률 수식
+  const totalSalesExcelRow=contractExcelRow+1+rowDefs.length+1;
+  ws1[XLSX.utils.encode_cell({r:totalSalesExcelRow-2,c:15})]={t:'n',f:`IF(B${totalSalesExcelRow-1}=0,"-",O${totalSalesExcelRow-1}/B${totalSalesExcelRow-1})`};
+
+  ws1['!cols']=[{wch:22},{wch:16},...MONTHS.map(()=>({wch:15})),{wch:18},{wch:12}];
+  XLSX.utils.book_append_sheet(wb,ws1,'월별_손익_요약');
+
+  // Sheet: 누적_계약매출
+  const cArr=data.contractSales||[];
+  const cData=[['현재 누적 매출 현황 상세'],[],['No','프로젝트','2026 계약매출','목표대비']];
+  cArr.forEach((r,i)=>cData.push([i+1,r.project,num(r.amount),TARGET_REVENUE?num(r.amount)/TARGET_REVENUE:0]));
+  const cTotRow=cData.length+1;
+  cData.push(['','합 계',null,null]);
+  const wsC=XLSX.utils.aoa_to_sheet(cData);
+  if(cArr.length>0){
+    wsC[`C${cTotRow}`]={t:'n',f:`SUM(C4:C${cTotRow-1})`};
+    wsC[`D${cTotRow}`]={t:'n',f:`IF(C${cTotRow}=0,0,C${cTotRow}/${TARGET_REVENUE})`};
+  }
+  wsC['!cols']=[{wch:6},{wch:40},{wch:18},{wch:12}];
+  XLSX.utils.book_append_sheet(wb,wsC,'누적_계약매출');
+
+  // Per-month sheets
+  MONTHS.forEach(m=>{
+    const d=data.months[m];if(!d)return;
+    const s=calcSummary(m);
+    // Labor
+    const lData=[[`${m}월 내부/외주 인건비`],['구분','프로젝트','내부인원','내부인건비','외주인원','외주인건비','중개수수료']];
+    (d.labor||[]).forEach(r=>lData.push([r.type,r.project,r.intPerson,r.intCost,r.extPerson,r.extCost,r.fee]));
+    const lr=lData.length+1;lData.push(['합계','',null,null,null,null,null]);
+    const wsl=XLSX.utils.aoa_to_sheet(lData);
+    if((d.labor||[]).length>0){['C','D','E','F','G'].forEach(c=>{wsl[`${c}${lr}`]={t:'n',f:`SUM(${c}3:${c}${lr-1})`}})}
+    wsl['!cols']=[{wch:10},{wch:35},{wch:8},{wch:16},{wch:8},{wch:16},{wch:12}];
+
+    // Invoice
+    const iData=[[`${m}월 매출세금계산서`],['구분','발행일자','거래처','사업자번호','품명','공급가액','부서명']];
+    (d.invoice||[]).forEach(r=>iData.push([r.type,r.date,r.client,r.bizNo,r.item,r.amount,r.dept]));
+    const ir=iData.length+1;iData.push(['','','','','합계',null,'']);
+    const wsi=XLSX.utils.aoa_to_sheet(iData);
+    if((d.invoice||[]).length>0)wsi[`F${ir}`]={t:'n',f:`SUM(F3:F${ir-1})`};
+
+    // Expense
+    const eData=[[`${m}월 직접비/간접비`],['구분','내용','프로젝트','금액']];
+    (d.expense||[]).forEach(r=>eData.push([r.type,r.desc,r.project,r.amount]));
+    const er=eData.length+1;eData.push(['합계','','',null]);eData.push([]);eData.push(['간접비',d.indirect||0]);
+    const wse=XLSX.utils.aoa_to_sheet(eData);
+    if(d.expense.length>0)wse[`D${er}`]={t:'n',f:`SUM(D3:D${er-1})`};
+
+    // Combine into single sheet per month
+    const mData=[[`${m}월 실적 상세`],[],
+      ['진행매출',d.revenue],['발행매출',(d.invoice||[]).reduce((a,r)=>a+num(r.amount),0)],
+      ['원가합계',totalCost(s)],['매출총이익',null],['간접비',d.indirect],['영업이익',null],[]
+    ];
+    const wsm=XLSX.utils.aoa_to_sheet(mData);
+    wsm['B6']={t:'n',f:'B3-B5'};wsm['B8']={t:'n',f:'B6-B7'};
+    wsm['!cols']=[{wch:16},{wch:18}];
+
+    // Add all sub-sheets
+    XLSX.utils.book_append_sheet(wb,wsm,`${m}월_요약`);
+    XLSX.utils.book_append_sheet(wb,wsl,`${m}월_인건비`);
+    if((d.invoice||[]).length>0||(d.payment||[]).length>0)XLSX.utils.book_append_sheet(wb,wsi,`${m}월_매출`);
+    if((d.expense||[]).length>0)XLSX.utils.book_append_sheet(wb,wse,`${m}월_직접비`);
+  });
+
+  XLSX.writeFile(wb,`컨버전스2본부_2026년_월별현황.xlsx`);
+}
+
+// ===== EXCEL UPLOAD =====
+function uploadExcel(){document.getElementById('excelUpload').click()}
+function processExcelUpload(e){
+  const file=e.target.files[0];if(!file)return;
+  const mm=file.name.match(/(\d+)\s*월/);
+  if(!mm){alert('파일명에서 월을 식별할 수 없습니다.\n예: 2026년_1월_결산자료_컨버전스2본부.xlsx');return}
+  const month=parseInt(mm[1]);
+  if(month<1||month>12){alert('유효하지 않은 월: '+month);return}
+  const reader=new FileReader();
+  reader.onload=function(evt){
+    const wb=XLSX.read(new Uint8Array(evt.target.result),{type:'array'});
+    const res={labor:[],invoice:[],payment:[],purchase:[],expense:[],revenue:null,indirect:null};
+    wb.SheetNames.forEach(name=>{
+      const rows=XLSX.utils.sheet_to_json(wb.Sheets[name],{header:1,defval:''});
+      const nl=name.toLowerCase();
+      if(nl.includes('세금계산서')||nl.includes('발행매출'))upParseInvoice(rows,res);
+      else if(nl.includes('입금'))upParsePayment(rows,res);
+      else if(nl.includes('인건비'))upParseLabor(rows,res);
+      else if(nl.includes('턴키')||nl.includes('매입'))upParsePurchase(rows,res);
+      else if(nl.includes('직접비'))upParseExpense(rows,res);
+      // 월별손익 시트에서 진행매출/간접비 추출 (월 컬럼 기반)
+      if(nl.includes('손익')||nl.includes('요약'))upParseSummarySheet(rows,res,month);
+      // 모든 시트에서 진행매출/간접비 탐색 (단순 레이블)
+      upParseMeta(rows,res);
+    });
+    showUploadPreview(month,res,file.name);
+  };
+  reader.readAsArrayBuffer(file);e.target.value='';
+}
+function upNum(v){if(v==null||v==='')return 0;if(typeof v==='number')return v;return parseFloat(String(v).replace(/[^0-9.\-]/g,''))||0}
+function upStr(v){return v==null?'':String(v).trim()}
+function upDate(v){if(!v)return '';if(typeof v==='number'){const d=new Date((v-25569)*86400000);const mm=String(d.getMonth()+1).padStart(2,'0');const dd=String(d.getDate()).padStart(2,'0');return d.getFullYear()+'-'+mm+'-'+dd}return String(v)}
+function upFindStart(rows,keyword){for(let i=0;i<rows.length;i++){if(rows[i].some(c=>String(c).includes(keyword)))return i+1}return -1}
+function upFindCol(row,kw){for(let c=0;c<(row||[]).length;c++){if(String(row[c]).includes(kw))return c}return -1}
+function upFindHdr(rows,kw,minCells){minCells=minCells||1;for(let i=0;i<rows.length;i++){const r=rows[i]||[];if(r.some(c=>String(c).includes(kw))){if(minCells<=1)return i;let cnt=0;r.forEach(c=>{if(String(c).trim())cnt++});if(cnt>=minCells)return i}}return -1}
+
+function upParseInvoice(rows,res){
+  const hi=upFindHdr(rows,'공급가액',3);if(hi<0)return;
+  const h=rows[hi];
+  const cT=upFindCol(h,'구분'),cD=Math.max(upFindCol(h,'발행일'),upFindCol(h,'일자')),cCl=upFindCol(h,'거래처'),cBz=upFindCol(h,'사업자'),cIt=upFindCol(h,'품명'),cA=upFindCol(h,'공급가액'),cDp=upFindCol(h,'부서');
+  for(let i=hi+1;i<rows.length;i++){const r=rows[i];
+    const type=upStr(r[cT]);const amt=upNum(r[cA]);
+    if(!type||String(r[0]).includes('합계')||(cIt>=0&&String(r[cIt]).includes('합계'))||(!amt&&cCl>=0&&!upStr(r[cCl])))continue;
+    res.invoice.push({type:type||'매출',date:upDate(cD>=0?r[cD]:''),client:upStr(cCl>=0?r[cCl]:''),bizNo:upStr(cBz>=0?r[cBz]:''),item:upStr(cIt>=0?r[cIt]:''),amount:amt,dept:upStr(cDp>=0?r[cDp]:'')||DEPT})}
+}
+function upParsePayment(rows,res){
+  const hi=upFindHdr(rows,'입금액',3);if(hi<0)return;
+  const h=rows[hi];
+  const cT=upFindCol(h,'구분'),cD=Math.max(upFindCol(h,'입금일'),upFindCol(h,'일자')),cCl=upFindCol(h,'거래처'),cIt=upFindCol(h,'품명'),cA=upFindCol(h,'입금액'),cDp=upFindCol(h,'부서');
+  for(let i=hi+1;i<rows.length;i++){const r=rows[i];
+    const type=upStr(r[cT]);const amt=upNum(r[cA]);
+    if(!type||String(r[0]).includes('합계')||(cIt>=0&&String(r[cIt]).includes('합계'))||(!amt&&cCl>=0&&!upStr(r[cCl])))continue;
+    res.payment.push({type:type||'입금',date:upDate(cD>=0?r[cD]:''),client:upStr(cCl>=0?r[cCl]:''),item:upStr(cIt>=0?r[cIt]:''),amount:amt,dept:upStr(cDp>=0?r[cDp]:'')||DEPT})}
+}
+function upParseLabor(rows,res){
+  // 1) 실제 컬럼 헤더 행 찾기 (개별 셀에 내부인건비, 외주인건비 등이 있는 행)
+  //    병합 카테고리 헤더(비어있지 않은 셀 <4개)는 건너뜀
+  let hi=-1;
+  for(let i=0;i<rows.length;i++){
+    const cells=rows[i]||[];
+    let colMatches=0;
+    let nonEmpty=0;
+    cells.forEach(c=>{const v=String(c).replace(/[\r\n]+/g,' ').trim();
+      if(v)nonEmpty++;
+      if(/내부[\s]*인원/.test(v))colMatches++;
+      if(/내부[\s]*인건비/.test(v))colMatches++;
+      if(/외주[\s]*인원/.test(v))colMatches++;
+      if(/외주[\s]*인건비/.test(v))colMatches++;
+    });
+    // 비어있지 않은 셀이 4개 미만이면 병합 카테고리 헤더로 간주, 건너뜀
+    if(colMatches>=2&&nonEmpty>=4){hi=i;break}
+  }
+  // 병합 헤더만 있고 실제 컬럼 헤더가 없는 경우: 구분/인원/인건비 패턴으로 재시도
+  if(hi<0){
+    for(let i=0;i<rows.length;i++){
+      const cells=rows[i]||[];
+      let hasName=false,hasCost=false,nonEmpty=0;
+      cells.forEach(c=>{const v=String(c).replace(/[\r\n]+/g,' ').trim();
+        if(v)nonEmpty++;
+        if(/구분|프로젝트/.test(v))hasName=true;
+        if(/인건비/.test(v))hasCost=true;
+      });
+      if(hasName&&hasCost&&nonEmpty>=4){hi=i;break}
+    }
+  }
+  if(hi<0)return;
+  console.log('[업로드] 인건비 헤더 행:', hi, JSON.stringify(rows[hi]));
+  // 2) 헤더에서 컬럼 위치 자동 감지
+  const h=rows[hi];
+  let cN=-1,cIP=-1,cIC=-1,cEP=-1,cEC=-1,cF=-1;
+  for(let c=0;c<h.length;c++){const v=String(h[c]).replace(/[\r\n]+/g,' ').trim();
+    if(/구분|프로젝트/.test(v)&&!/인건비|인원|수수료/.test(v)){if(cN<0)cN=c}
+    else if(/내부[\s]*인원/.test(v))cIP=c;
+    else if(/내부[\s]*인건비/.test(v))cIC=c;
+    else if(/외주[\s]*인원/.test(v))cEP=c;
+    else if(/외주[\s]*인건비/.test(v))cEC=c;
+    else if(/중개|수수료/.test(v))cF=c;
+  }
+  // "인원" 컬럼(내부/외주 접두사 없음): 내부인건비 앞이면 내부인원, 외주인건비 앞이면 외주인원
+  if(cIP<0||cEP<0){
+    for(let c=0;c<h.length;c++){const v=String(h[c]).replace(/[\r\n]+/g,' ').trim();
+      if(v==='인원'||/^인원$/.test(v)){
+        if(cIP<0&&cIC>0&&c<cIC)cIP=c;
+        else if(cEP<0&&cEC>0&&c<cEC&&c>cIC)cEP=c;
+      }
+    }
+  }
+  // 위치 보정: 인건비 컬럼을 못 찾으면 인원 컬럼 바로 다음으로 추정
+  if(cIP>=0&&cIC<0)cIC=cIP+1;
+  if(cEP>=0&&cEC<0)cEC=cEP+1;
+  if(cN<0)cN=0;if(cIP<0)cIP=cN+1;if(cIC<0)cIC=cIP+1;
+  if(cEP<0)cEP=cIC+1;if(cEC<0)cEC=cEP+1;if(cF<0)cF=cEC+1;
+  console.log('[업로드] 컬럼 매핑: 구분='+cN+' 내부인원='+cIP+' 내부인건비='+cIC+' 외주인원='+cEP+' 외주인건비='+cEC+' 수수료='+cF);
+  // 3) 데이터 행 읽기 (헤더 다음부터, 합계/소계/총합계 행 건너뜀)
+  let curCategory='프로젝트'; // 현재 카테고리 컨텍스트 추적
+  for(let i=hi+1;i<rows.length;i++){const r=rows[i];
+    const name=upStr(r[cN]);if(!name)continue;
+    // 요약/소계/합계 행 건너뛰기
+    if(/합계|소계|^본부|총합계/.test(name))continue;
+    // 카테고리 소계 행: 건너뛰되 카테고리 컨텍스트 업데이트
+    const nt=name.trim();
+    if(/^프로젝트$/.test(nt)){curCategory='프로젝트';continue}
+    if(/^제안$/.test(nt)){curCategory='제안';continue}
+    const ip=upNum(r[cIP]),ic=upNum(r[cIC]),ep=upNum(r[cEP]),ec=upNum(r[cEC]),fee=upNum(r[cF]);
+    // 인건비/수수료가 모두 0인 행 건너뛰기 (하위 세부 행 등)
+    if(ic===0&&ec===0&&fee===0)continue;
+    let type=curCategory;
+    if(name==='공통'||name.includes('공통'))type='공통';
+    else if(name==='유휴'||name.includes('유휴'))type='유휴';
+    console.log('[업로드] 인건비 행:', name, 'type='+type, 'intCost='+ic, 'extCost='+ec);
+    res.labor.push({type,project:name,intPerson:ip,intCost:ic,extPerson:ep,extCost:ec,fee})}
+}
+function upParsePurchase(rows,res){
+  const hi=upFindHdr(rows,'공급가액',3);if(hi<0)return;
+  const h=rows[hi];
+  const cT=upFindCol(h,'구분'),cD=Math.max(upFindCol(h,'발행일'),upFindCol(h,'일자')),cCl=upFindCol(h,'거래처'),cBz=upFindCol(h,'사업자'),cIt=upFindCol(h,'품명'),cA=upFindCol(h,'공급가액'),cDp=upFindCol(h,'부서');
+  for(let i=hi+1;i<rows.length;i++){const r=rows[i];
+    const type=upStr(r[cT]);const amt=upNum(r[cA]);
+    if(!type||String(r[0]).includes('합계')||(cIt>=0&&String(r[cIt]).includes('합계'))||(!amt&&cCl>=0&&!upStr(r[cCl])))continue;
+    res.purchase.push({type:type||'매입',date:upDate(cD>=0?r[cD]:''),client:upStr(cCl>=0?r[cCl]:''),bizNo:upStr(cBz>=0?r[cBz]:''),item:upStr(cIt>=0?r[cIt]:''),amount:amt,dept:upStr(cDp>=0?r[cDp]:'')||DEPT})}
+}
+function upParseExpense(rows,res){
+  // 헤더 행 찾기: '금액'을 포함하는 컬럼이 있는 행 (비어있지 않은 셀 3개 이상)
+  let hi=-1,cType=-1,cDesc=-1,cProj=-1,cAmt=-1;
+  for(let i=0;i<rows.length;i++){const r=rows[i]||[];
+    let nonEmpty=0;r.forEach(c=>{if(String(c).trim())nonEmpty++});
+    if(nonEmpty<3)continue; // 설명/안내 행 건너뜀
+    for(let c=0;c<r.length;c++){const v=String(r[c]).replace(/[\r\n]+/g,' ').trim();
+      if(/금액|^합계$/.test(v)&&!/설명|내용/.test(v)){cAmt=c;hi=i;break}
+    }
+    if(hi>=0)break;
+  }
+  if(hi<0)return;
+  console.log('[업로드] 직접비 헤더 행:', hi, JSON.stringify(rows[hi]));
+  const h=rows[hi];
+  for(let c=0;c<h.length;c++){const v=String(h[c]).replace(/[\r\n]+/g,' ').trim();
+    if(/구분|유형|분류/.test(v)&&c!==cAmt)cType=c;
+    else if(/담당|내용|적요|설명/.test(v))cDesc=c;
+    else if(/프로젝트|project/i.test(v))cProj=c;
+  }
+  if(cDesc<0&&cType<0)cDesc=0;
+  if(cDesc<0)cDesc=cType;
+  for(let i=hi+1;i<rows.length;i++){const r=rows[i];
+    const raw0=upStr(r[cDesc]);
+    if(!raw0||/^합계|^소계|^▣|^간접비/.test(raw0))continue;
+    const amt=upNum(r[cAmt]);if(amt===0)continue;
+    const type=cType>=0?upStr(r[cType])||'기타':'기타';
+    const desc=upStr(r[cDesc]);
+    const project=cProj>=0?upStr(r[cProj]):'';
+    res.expense.push({type,desc,project,amount:amt});
+  }
+  // 간접비 추출 (시트 내 '간접비' 키워드가 포함된 행)
+  for(let i=0;i<rows.length;i++){const r=rows[i];if(!r)continue;
+    const c0=String(r[0]).replace(/[\r\n]+/g,' ').trim();
+    if(/간접비/.test(c0)&&!/직접비/.test(c0)){
+      for(let c=1;c<r.length;c++){const v=upNum(r[c]);if(v>0){
+        if(res.indirect===null)res.indirect=v;
+        console.log('[업로드] 간접비(직접비시트): '+v);break;
+      }}
+      break;
+    }
+  }
+}
+
+// 월별손익 시트에서 진행매출/간접비 추출 (월 컬럼 기반)
+function upParseSummarySheet(rows,res,month){
+  // 월 컬럼 위치 찾기: 헤더에서 "1월", "2월" 등을 찾아 월별 컬럼 매핑
+  let monthCol=-1;
+  for(let i=0;i<Math.min(rows.length,10);i++){const r=rows[i]||[];
+    for(let c=0;c<r.length;c++){
+      const v=String(r[c]).replace(/[\r\n]+/g,' ').trim();
+      if(v===month+'월'||v==='25.'+month+'월'||v==='26.'+month+'월'||v===String(month)+'월'){monthCol=c;break}
+    }
+    if(monthCol>=0)break;
+  }
+  // 직접 월 헤더를 못 찾으면, 1월 컬럼 위치 + (month-1)로 추정
+  if(monthCol<0){
+    for(let i=0;i<Math.min(rows.length,10);i++){const r=rows[i]||[];
+      for(let c=0;c<r.length;c++){
+        const v=String(r[c]).replace(/[\r\n]+/g,' ').trim();
+        if(v==='1월'||v==='25.1월'||v==='26.1월'){monthCol=c+(month-1);break}
+      }
+      if(monthCol>=0)break;
+    }
+  }
+  if(monthCol<0){console.log('[업로드] 월별손익: 월 컬럼 찾지 못함');return}
+  console.log('[업로드] 월별손익: '+month+'월 컬럼='+monthCol);
+  // 진행매출 행 찾기
+  for(let i=0;i<rows.length;i++){const r=rows[i]||[];
+    const allStr=r.map(c=>String(c).replace(/[\r\n]+/g,' ').trim()).join('|');
+    if(/진행매출/.test(allStr)&&res.revenue===null){
+      const v=upNum(r[monthCol]);
+      if(v>0){res.revenue=v;console.log('[업로드] 진행매출(월별손익): '+v+' (행:'+i+', 열:'+monthCol+')');}
+    }
+    // 간접비 행 찾기
+    if(/간접비/.test(allStr)&&!/직접비/.test(allStr)&&res.indirect===null){
+      const v=upNum(r[monthCol]);
+      if(v>0){res.indirect=v;console.log('[업로드] 간접비(월별손익): '+v+' (행:'+i+', 열:'+monthCol+')');}
+    }
+  }
+}
+
+function upParseMeta(rows,res){
+  for(let i=0;i<rows.length;i++){const r=rows[i];if(!r||!r.length)continue;
+    const k=String(r[0]).replace(/[\r\n]+/g,' ').trim();
+    // 진행매출 탐색 (다양한 레이블 지원)
+    if(/진행[\s]*매출|^매출액|^당월[\s]*매출|^월[\s]*매출|^매출[\s]*\(진행|^매출$/.test(k)&&res.revenue===null){
+      for(let c=1;c<r.length;c++){const v=upNum(r[c]);if(v>0){res.revenue=v;console.log('[업로드] 진행매출(meta): '+v+' (행:'+i+', 열:'+c+', 레이블:'+k+')');break}}
+    }
+    // 간접비 탐색
+    if(/간접비/.test(k)&&!/직접비/.test(k)&&res.indirect===null){
+      for(let c=1;c<r.length;c++){const v=upNum(r[c]);if(v>0){res.indirect=v;console.log('[업로드] 간접비(meta): '+v+' (행:'+i+', 레이블:'+k+')');break}}
+    }
+  }
+}
+
+function showUploadPreview(month,res,filename){
+  const invT=res.invoice.reduce((s,r)=>s+r.amount,0);
+  const labI=res.labor.reduce((s,r)=>s+r.intCost,0);
+  const labE=res.labor.reduce((s,r)=>s+r.extCost+r.fee,0);
+  const payT=res.payment.reduce((s,r)=>s+r.amount,0);
+  const purT=res.purchase.reduce((s,r)=>s+r.amount,0);
+  const expT=res.expense.reduce((s,r)=>s+r.amount,0);
+  const existing=data.months[month];
+  const hasData=(existing.labor||[]).length>0||(existing.invoice||[]).length>0||(existing.expense||[]).length>0;
+  let h='<div style="margin-bottom:16px;padding:12px;background:var(--primary-l);border-radius:8px;font-size:13px">';
+  h+='<strong>&#128193; 파일:</strong> '+filename+'<br>';
+  h+='<strong>&#128197; 대상 월:</strong> <span style="color:var(--primary);font-weight:700;font-size:16px">'+month+'월</span>';
+  if(hasData)h+='<br><span style="color:var(--warn);font-weight:600">&#9888;&#65039; 기존 '+month+'월 데이터가 있습니다. 업로드 시 덮어씁니다.</span>';
+  h+='</div>';
+  h+='<table style="width:100%;border-collapse:collapse;font-size:13px;min-width:auto">';
+  h+='<thead><tr><th style="text-align:left;padding:8px;border-bottom:2px solid var(--g200)">항목</th><th style="text-align:right;padding:8px;border-bottom:2px solid var(--g200)">건수</th><th style="text-align:right;padding:8px;border-bottom:2px solid var(--g200)">금액</th></tr></thead><tbody>';
+  const items=[
+    ['&#128200; 진행매출',res.revenue!==null?'O':'X',res.revenue||0],
+    ['&#128101; 내부/외주 인건비',res.labor.length,labI+labE],['&nbsp;&nbsp;- 내부인건비','-',labI],['&nbsp;&nbsp;- 외주인건비+수수료','-',labE],
+    ['&#128203; 매출세금계산서',res.invoice.length,invT],['&#128176; 입금',res.payment.length,payT],['&#128722; 매입(턴키)',res.purchase.length,purT],['&#128181; 직접비',res.expense.length,expT],
+    ['&#128178; 간접비',res.indirect!==null?'O':'X',res.indirect||0]];
+  items.forEach(([lb,cnt,amt])=>{const sub=lb.startsWith('&nbsp;');
+    h+='<tr style="'+(sub?'color:var(--g500)':'')+'"><td style="padding:6px 8px'+(sub?';padding-left:24px':'')+'">'+lb+'</td>';
+    h+='<td style="text-align:right;padding:6px 8px">'+(cnt==='-'?'':cnt+'건')+'</td>';
+    h+='<td style="text-align:right;padding:6px 8px;font-weight:'+(sub?'normal':'600')+'">'+fmt(amt)+'</td></tr>'});
+  h+='</tbody></table>';
+  h+='<div style="margin-top:12px;padding:10px;background:#fffbeb;border-radius:6px;font-size:12px;color:#92400e">';
+  h+='&#128161; <strong>매출액</strong>은 매출세금계산서에서 자동 합산됩니다. 진행매출이 다를 경우 대시보드에서 수동 조정하세요.</div>';
+  h+='<div style="display:flex;justify-content:flex-end;gap:8px;border-top:1px solid var(--g200);margin-top:16px;padding-top:16px">';
+  h+='<button class="btn btn-s" onclick="closeModal()">취소</button>';
+  h+='<button class="btn btn-ok" onclick="applyUpload('+month+')">&#10004; '+month+'월에 적용</button></div>';
+  window._uploadResult=res;
+  document.getElementById('moTitle').textContent='&#128228; 결산자료 업로드 확인';
+  document.getElementById('moBody').innerHTML=h;
+  document.querySelector('#modal > .mo-c > .ma').style.display='none';
+  document.getElementById('modal').classList.add('show');
+}
+
+function applyUpload(month){
+  const res=window._uploadResult;if(!res)return;
+  const d=data.months[month];
+  d.labor=res.labor;d.invoice=res.invoice;d.payment=res.payment;d.purchase=res.purchase;d.expense=res.expense;
+  if(res.revenue!==null)d.revenue=res.revenue;
+  if(res.indirect!==null)d.indirect=res.indirect;
+  save();window._uploadResult=null;closeModal();
+  curMonth=month;document.getElementById('selMonth').value=month;render();
+  let msg='\u2705 '+month+'월 데이터가 업로드되었습니다!\n\n';
+  msg+='인건비: '+res.labor.length+'건\n매출세금계산서: '+res.invoice.length+'건\n입금: '+res.payment.length+'건\n매입: '+res.purchase.length+'건\n직접비: '+res.expense.length+'건';
+  if(res.revenue!==null)msg+='\n진행매출: '+fmt(res.revenue)+'원';
+  if(res.indirect!==null)msg+='\n간접비: '+fmt(res.indirect)+'원';
+  alert(msg);
+}
+
+// ===== INIT =====
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
+document.getElementById('modal').addEventListener('click',e=>{if(e.target.id==='modal')closeModal()});
+render();
+</script>
+</body>
+</html>

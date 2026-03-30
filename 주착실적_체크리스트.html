@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>컨버전스 2본부 - 주착실적 체크리스트</title>
+<style>
+  :root {
+    --primary: #1a56db;
+    --primary-light: #e8effc;
+    --primary-dark: #12408a;
+    --success: #059669;
+    --success-light: #d1fae5;
+    --warning: #d97706;
+    --warning-light: #fef3c7;
+    --danger: #dc2626;
+    --danger-light: #fee2e2;
+    --gray-50: #f9fafb;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-300: #d1d5db;
+    --gray-400: #9ca3af;
+    --gray-500: #6b7280;
+    --gray-600: #4b5563;
+    --gray-700: #374151;
+    --gray-800: #1f2937;
+    --gray-900: #111827;
+    --shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+    --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+    --radius: 8px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+    background: var(--gray-100);
+    color: var(--gray-800);
+    line-height: 1.6;
+  }
+  .header {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: #fff;
+    padding: 20px 0;
+    box-shadow: var(--shadow-md);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .header h1 { font-size: 20px; font-weight: 700; }
+  .header .subtitle { font-size: 13px; opacity: 0.85; margin-top: 2px; }
+  .week-nav {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .week-nav button {
+    background: rgba(255,255,255,0.2);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: #fff;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.2s;
+  }
+  .week-nav button:hover { background: rgba(255,255,255,0.35); }
+  .week-nav .week-label {
+    font-size: 15px;
+    font-weight: 600;
+    min-width: 200px;
+    text-align: center;
+  }
+  .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+
+  /* 요약 카드 */
+  .summary-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .summary-card {
+    background: #fff;
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow);
+    text-align: center;
+  }
+  .summary-card .label { font-size: 13px; color: var(--gray-500); margin-bottom: 4px; }
+  .summary-card .value { font-size: 28px; font-weight: 700; }
+  .summary-card .sub { font-size: 12px; color: var(--gray-400); margin-top: 2px; }
+  .card-total .value { color: var(--primary); }
+  .card-done .value { color: var(--success); }
+  .card-progress .value { color: var(--warning); }
+  .card-pending .value { color: var(--gray-400); }
+
+  /* 진행률 바 */
+  .progress-section {
+    background: #fff;
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow);
+    margin-bottom: 24px;
+  }
+  .progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .progress-header .title { font-size: 15px; font-weight: 600; }
+  .progress-header .pct { font-size: 20px; font-weight: 700; color: var(--primary); }
+  .progress-bar-bg {
+    height: 12px;
+    background: var(--gray-200);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary), var(--success));
+    border-radius: 6px;
+    transition: width 0.5s ease;
+  }
+
+  /* 툴바 */
+  .toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .toolbar-left { display: flex; gap: 8px; flex-wrap: wrap; }
+  .filter-btn {
+    padding: 6px 14px;
+    border: 1px solid var(--gray-300);
+    border-radius: 20px;
+    background: #fff;
+    color: var(--gray-600);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .filter-btn:hover { border-color: var(--primary); color: var(--primary); }
+  .filter-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+  .btn-add {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .btn-add:hover { background: var(--primary-dark); }
+
+  /* 카테고리 섹션 */
+  .category-section {
+    background: #fff;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+  .category-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    background: var(--gray-50);
+    border-bottom: 1px solid var(--gray-200);
+    cursor: pointer;
+    user-select: none;
+  }
+  .category-header:hover { background: var(--gray-100); }
+  .category-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    font-size: 15px;
+  }
+  .category-badge {
+    font-size: 12px;
+    padding: 2px 10px;
+    border-radius: 10px;
+    font-weight: 500;
+  }
+  .category-toggle { font-size: 18px; color: var(--gray-400); transition: transform 0.2s; }
+  .category-toggle.collapsed { transform: rotate(-90deg); }
+  .category-body { padding: 0; }
+  .category-body.collapsed { display: none; }
+
+  /* 체크리스트 아이템 */
+  .checklist-item {
+    display: flex;
+    align-items: flex-start;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--gray-100);
+    transition: background 0.15s;
+    gap: 12px;
+  }
+  .checklist-item:last-child { border-bottom: none; }
+  .checklist-item:hover { background: var(--gray-50); }
+  .checklist-item.done { background: var(--success-light); }
+  .checklist-item.done .item-text { text-decoration: line-through; color: var(--gray-400); }
+
+  .item-checkbox {
+    width: 22px;
+    height: 22px;
+    border: 2px solid var(--gray-300);
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+    transition: all 0.2s;
+  }
+  .item-checkbox:hover { border-color: var(--primary); }
+  .item-checkbox.checked {
+    background: var(--success);
+    border-color: var(--success);
+    color: #fff;
+  }
+  .item-checkbox.checked::after { content: '\2713'; font-size: 14px; font-weight: 700; }
+
+  .item-content { flex: 1; min-width: 0; }
+  .item-text { font-size: 14px; margin-bottom: 4px; }
+  .item-meta {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .item-tag {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 500;
+  }
+  .tag-person { background: #ede9fe; color: #6d28d9; }
+  .tag-deadline { background: #fef3c7; color: #92400e; }
+  .tag-priority-high { background: #fee2e2; color: #dc2626; }
+  .tag-priority-mid { background: #fef3c7; color: #d97706; }
+  .tag-priority-low { background: #d1fae5; color: #059669; }
+  .tag-note { background: var(--gray-100); color: var(--gray-600); }
+
+  .item-actions {
+    display: flex;
+    gap: 4px;
+    opacity: 0;
+    transition: opacity 0.2s;
+    flex-shrink: 0;
+  }
+  .checklist-item:hover .item-actions { opacity: 1; }
+  .item-actions button {
+    width: 30px;
+    height: 30px;
+    border: none;
+    background: transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gray-400);
+    transition: all 0.15s;
+  }
+  .item-actions button:hover { background: var(--gray-100); color: var(--gray-700); }
+  .item-actions .btn-del:hover { background: var(--danger-light); color: var(--danger); }
+
+  /* 모달 */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal {
+    background: #fff;
+    border-radius: 12px;
+    padding: 28px;
+    width: 100%;
+    max-width: 520px;
+    box-shadow: var(--shadow-lg);
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .modal h2 { font-size: 18px; font-weight: 700; margin-bottom: 20px; }
+  .form-group { margin-bottom: 16px; }
+  .form-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gray-600);
+    margin-bottom: 6px;
+  }
+  .form-group input, .form-group select, .form-group textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--gray-300);
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: inherit;
+    transition: border-color 0.2s;
+  }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-light);
+  }
+  .form-group textarea { resize: vertical; min-height: 70px; }
+  .form-row { display: flex; gap: 12px; }
+  .form-row .form-group { flex: 1; }
+  .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 24px;
+  }
+  .btn-cancel {
+    padding: 10px 20px;
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius);
+    background: #fff;
+    color: var(--gray-600);
+    font-size: 14px;
+    cursor: pointer;
+  }
+  .btn-cancel:hover { background: var(--gray-50); }
+  .btn-save {
+    padding: 10px 24px;
+    border: none;
+    border-radius: var(--radius);
+    background: var(--primary);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .btn-save:hover { background: var(--primary-dark); }
+
+  /* 카테고리 관리 모달 */
+  .cat-list { list-style: none; }
+  .cat-list li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--gray-100);
+  }
+  .cat-list li input { flex: 1; }
+  .cat-list li button {
+    padding: 4px 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+  }
+  .cat-del { background: var(--danger-light); color: var(--danger); }
+  .cat-del:hover { background: #fecaca; }
+
+  /* 엑셀 내보내기 버튼 */
+  .btn-export {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    background: #fff;
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius);
+    font-size: 13px;
+    color: var(--gray-700);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-export:hover { border-color: var(--success); color: var(--success); }
+
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--gray-400);
+  }
+  .empty-state .icon { font-size: 40px; margin-bottom: 8px; }
+
+  /* 히스토리 */
+  .history-section { margin-top: 24px; }
+  .history-section h3 {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: var(--gray-700);
+  }
+  .history-table {
+    width: 100%;
+    background: #fff;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .history-table table { width: 100%; border-collapse: collapse; }
+  .history-table th {
+    padding: 10px 16px;
+    background: var(--gray-50);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gray-600);
+    text-align: left;
+    border-bottom: 1px solid var(--gray-200);
+  }
+  .history-table td {
+    padding: 10px 16px;
+    font-size: 13px;
+    border-bottom: 1px solid var(--gray-100);
+  }
+  .pct-bar {
+    display: inline-block;
+    width: 80px;
+    height: 8px;
+    background: var(--gray-200);
+    border-radius: 4px;
+    overflow: hidden;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+  .pct-bar-fill { height: 100%; border-radius: 4px; background: var(--success); }
+
+  @media (max-width: 768px) {
+    .container { padding: 16px; }
+    .summary-cards { grid-template-columns: repeat(2, 1fr); }
+    .header-inner { flex-direction: column; align-items: flex-start; }
+    .form-row { flex-direction: column; gap: 0; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <div>
+      <h1>컨버전스 2본부 - 주착실적 체크리스트</h1>
+      <div class="subtitle">주간 실적 관리 시스템</div>
+    </div>
+    <div class="week-nav">
+      <button onclick="changeWeek(-1)" title="이전 주">&larr;</button>
+      <span class="week-label" id="weekLabel"></span>
+      <button onclick="changeWeek(1)" title="다음 주">&rarr;</button>
+      <button onclick="goToday()" style="margin-left:8px;font-size:12px;">오늘</button>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <!-- 요약 카드 -->
+  <div class="summary-cards">
+    <div class="summary-card card-total">
+      <div class="label">전체 항목</div>
+      <div class="value" id="totalCount">0</div>
+      <div class="sub">체크리스트 항목</div>
+    </div>
+    <div class="summary-card card-done">
+      <div class="label">완료</div>
+      <div class="value" id="doneCount">0</div>
+      <div class="sub">착수 완료</div>
+    </div>
+    <div class="summary-card card-progress">
+      <div class="label">진행중</div>
+      <div class="value" id="progressCount">0</div>
+      <div class="sub">진행 항목</div>
+    </div>
+    <div class="summary-card card-pending">
+      <div class="label">미착수</div>
+      <div class="value" id="pendingCount">0</div>
+      <div class="sub">대기 항목</div>
+    </div>
+  </div>
+
+  <!-- 진행률 -->
+  <div class="progress-section">
+    <div class="progress-header">
+      <span class="title">주간 착수율</span>
+      <span class="pct" id="progressPct">0%</span>
+    </div>
+    <div class="progress-bar-bg">
+      <div class="progress-bar-fill" id="progressBar" style="width:0%"></div>
+    </div>
+  </div>
+
+  <!-- 툴바 -->
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <button class="filter-btn active" data-filter="all" onclick="setFilter('all',this)">전체</button>
+      <button class="filter-btn" data-filter="pending" onclick="setFilter('pending',this)">미착수</button>
+      <button class="filter-btn" data-filter="done" onclick="setFilter('done',this)">완료</button>
+      <button class="filter-btn" data-filter="high" onclick="setFilter('high',this)">긴급</button>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn-export" onclick="exportCSV()">&#128196; CSV 내보내기</button>
+      <button class="btn-export" onclick="openCategoryModal()">&#128193; 카테고리 관리</button>
+      <button class="btn-add" onclick="openAddModal()">&#43; 항목 추가</button>
+    </div>
+  </div>
+
+  <!-- 체크리스트 영역 -->
+  <div id="checklistArea"></div>
+
+  <!-- 주간 히스토리 -->
+  <div class="history-section">
+    <h3>&#128200; 주간 착수율 히스토리</h3>
+    <div class="history-table">
+      <table>
+        <thead>
+          <tr>
+            <th>주차</th>
+            <th>전체</th>
+            <th>완료</th>
+            <th>착수율</th>
+          </tr>
+        </thead>
+        <tbody id="historyBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- 항목 추가/수정 모달 -->
+<div class="modal-overlay" id="itemModal">
+  <div class="modal">
+    <h2 id="modalTitle">체크리스트 항목 추가</h2>
+    <input type="hidden" id="editItemId" value="">
+    <div class="form-group">
+      <label>항목명 *</label>
+      <input type="text" id="itemText" placeholder="체크리스트 항목을 입력하세요">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>카테고리 *</label>
+        <select id="itemCategory"></select>
+      </div>
+      <div class="form-group">
+        <label>우선순위</label>
+        <select id="itemPriority">
+          <option value="high">긴급 (상)</option>
+          <option value="mid" selected>보통 (중)</option>
+          <option value="low">낮음 (하)</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>담당자</label>
+        <input type="text" id="itemPerson" placeholder="담당자명">
+      </div>
+      <div class="form-group">
+        <label>마감일</label>
+        <input type="date" id="itemDeadline">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>비고</label>
+      <textarea id="itemNote" placeholder="추가 메모 (선택)"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('itemModal')">취소</button>
+      <button class="btn-save" onclick="saveItem()">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- 카테고리 관리 모달 -->
+<div class="modal-overlay" id="catModal">
+  <div class="modal">
+    <h2>카테고리 관리</h2>
+    <div style="display:flex;gap:8px;margin-bottom:16px;">
+      <input type="text" id="newCatName" placeholder="새 카테고리명" style="flex:1;padding:8px 12px;border:1px solid var(--gray-300);border-radius:6px;font-size:14px;">
+      <button class="btn-save" onclick="addCategory()" style="white-space:nowrap;">추가</button>
+    </div>
+    <ul class="cat-list" id="catList"></ul>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('catModal')">닫기</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ========== 데이터 관리 ==========
+const STORAGE_KEY = 'cv2_checklist_v2';
+const defaultCategories = [
+  '매출실적', '영업활동', '고객관리', '프로젝트', '보고/행정', '기타'
+];
+const defaultItems = [
+  { id: 1, text: '주간 매출 실적 집계', category: '매출실적', priority: 'high', person: '', deadline: '', note: '', done: false },
+  { id: 2, text: '신규 계약 건수 확인', category: '매출실적', priority: 'high', person: '', deadline: '', note: '', done: false },
+  { id: 3, text: '기존 고객 매출 증감 분석', category: '매출실적', priority: 'mid', person: '', deadline: '', note: '', done: false },
+  { id: 4, text: '영업 파이프라인 업데이트', category: '영업활동', priority: 'high', person: '', deadline: '', note: '', done: false },
+  { id: 5, text: '주간 영업 미팅 결과 정리', category: '영업활동', priority: 'mid', person: '', deadline: '', note: '', done: false },
+  { id: 6, text: '제안서 발송 현황 점검', category: '영업활동', priority: 'mid', person: '', deadline: '', note: '', done: false },
+  { id: 7, text: '고객 VOC 접수/처리 현황', category: '고객관리', priority: 'mid', person: '', deadline: '', note: '', done: false },
+  { id: 8, text: '핵심 고객 컨택 이력 확인', category: '고객관리', priority: 'mid', person: '', deadline: '', note: '', done: false },
+  { id: 9, text: '진행 프로젝트 마일스톤 점검', category: '프로젝트', priority: 'high', person: '', deadline: '', note: '', done: false },
+  { id: 10, text: '프로젝트 리스크 이슈 보고', category: '프로젝트', priority: 'mid', person: '', deadline: '', note: '', done: false },
+  { id: 11, text: '주간 보고서 작성 및 제출', category: '보고/행정', priority: 'high', person: '', deadline: '', note: '', done: false },
+  { id: 12, text: '월간 실적 보고 데이터 준비', category: '보고/행정', priority: 'mid', person: '', deadline: '', note: '', done: false },
+];
+
+let currentWeekKey = getWeekKey(new Date());
+let currentFilter = 'all';
+let data = loadData();
+
+function getWeekKey(date) {
+  const d = new Date(date);
+  const day = d.getDay();
+  const mon = new Date(d);
+  mon.setDate(d.getDate() - ((day + 6) % 7));
+  return mon.toISOString().slice(0, 10);
+}
+
+function getWeekLabel(weekKey) {
+  const mon = new Date(weekKey + 'T00:00:00');
+  const sun = new Date(mon);
+  sun.setDate(mon.getDate() + 6);
+  const y = mon.getFullYear();
+  const weekNum = getISOWeekNumber(mon);
+  const fmt = (d) => `${d.getMonth()+1}/${d.getDate()}`;
+  return `${y}년 ${weekNum}주차 (${fmt(mon)}~${fmt(sun)})`;
+}
+
+function getISOWeekNumber(date) {
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+}
+
+function loadData() {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (raw) return JSON.parse(raw);
+  return {
+    categories: [...defaultCategories],
+    weeks: {
+      [currentWeekKey]: { items: JSON.parse(JSON.stringify(defaultItems)) }
+    },
+    history: []
+  };
+}
+
+function saveData() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function getCurrentWeek() {
+  if (!data.weeks[currentWeekKey]) {
+    const prevWeeks = Object.keys(data.weeks).sort();
+    let items;
+    if (prevWeeks.length > 0) {
+      const lastWeek = data.weeks[prevWeeks[prevWeeks.length - 1]];
+      items = lastWeek.items.map(it => ({ ...it, done: false }));
+    } else {
+      items = JSON.parse(JSON.stringify(defaultItems));
+    }
+    data.weeks[currentWeekKey] = { items };
+    saveData();
+  }
+  return data.weeks[currentWeekKey];
+}
+
+// ========== 렌더링 ==========
+function render() {
+  const week = getCurrentWeek();
+  const items = week.items;
+  document.getElementById('weekLabel').textContent = getWeekLabel(currentWeekKey);
+
+  // 요약 카운트
+  const total = items.length;
+  const done = items.filter(i => i.done).length;
+  const pending = items.filter(i => !i.done).length;
+  const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+
+  document.getElementById('totalCount').textContent = total;
+  document.getElementById('doneCount').textContent = done;
+  document.getElementById('progressCount').textContent = 0;
+  document.getElementById('pendingCount').textContent = pending;
+  document.getElementById('progressPct').textContent = pct + '%';
+  document.getElementById('progressBar').style.width = pct + '%';
+
+  // 필터 적용
+  let filtered = items;
+  if (currentFilter === 'pending') filtered = items.filter(i => !i.done);
+  else if (currentFilter === 'done') filtered = items.filter(i => i.done);
+  else if (currentFilter === 'high') filtered = items.filter(i => i.priority === 'high');
+
+  // 카테고리별 그룹핑
+  const grouped = {};
+  data.categories.forEach(c => { grouped[c] = []; });
+  filtered.forEach(item => {
+    if (!grouped[item.category]) grouped[item.category] = [];
+    grouped[item.category].push(item);
+  });
+
+  const area = document.getElementById('checklistArea');
+  area.innerHTML = '';
+
+  let hasItems = false;
+  for (const cat of data.categories) {
+    const catItems = grouped[cat];
+    if (!catItems || catItems.length === 0) continue;
+    hasItems = true;
+    const catDone = catItems.filter(i => i.done).length;
+    const catPct = Math.round((catDone / catItems.length) * 100);
+
+    const section = document.createElement('div');
+    section.className = 'category-section';
+    section.innerHTML = `
+      <div class="category-header" onclick="toggleCategory(this)">
+        <div class="category-title">
+          <span>${cat}</span>
+          <span class="category-badge" style="background:${catPct===100?'var(--success-light)':'var(--primary-light)'};color:${catPct===100?'var(--success)':'var(--primary)'}">
+            ${catDone}/${catItems.length} (${catPct}%)
+          </span>
+        </div>
+        <span class="category-toggle">&#9660;</span>
+      </div>
+      <div class="category-body">
+        ${catItems.map(item => renderItem(item)).join('')}
+      </div>
+    `;
+    area.appendChild(section);
+  }
+
+  if (!hasItems) {
+    area.innerHTML = `<div class="empty-state"><div class="icon">&#128203;</div><p>해당 조건의 체크리스트 항목이 없습니다.</p></div>`;
+  }
+
+  renderHistory();
+  updateHistoryRecord();
+}
+
+function renderItem(item) {
+  const prioLabel = { high: '긴급', mid: '보통', low: '낮음' };
+  const prioClass = { high: 'tag-priority-high', mid: 'tag-priority-mid', low: 'tag-priority-low' };
+  let metaTags = '';
+  metaTags += `<span class="item-tag ${prioClass[item.priority]}">${prioLabel[item.priority]}</span>`;
+  if (item.person) metaTags += `<span class="item-tag tag-person">${item.person}</span>`;
+  if (item.deadline) metaTags += `<span class="item-tag tag-deadline">${item.deadline}</span>`;
+  if (item.note) metaTags += `<span class="item-tag tag-note">${item.note}</span>`;
+
+  return `
+    <div class="checklist-item ${item.done ? 'done' : ''}">
+      <div class="item-checkbox ${item.done ? 'checked' : ''}" onclick="toggleItem(${item.id})"></div>
+      <div class="item-content">
+        <div class="item-text">${item.text}</div>
+        <div class="item-meta">${metaTags}</div>
+      </div>
+      <div class="item-actions">
+        <button title="수정" onclick="openEditModal(${item.id})">&#9998;</button>
+        <button class="btn-del" title="삭제" onclick="deleteItem(${item.id})">&#128465;</button>
+      </div>
+    </div>
+  `;
+}
+
+// ========== 이벤트 핸들러 ==========
+function toggleItem(id) {
+  const week = getCurrentWeek();
+  const item = week.items.find(i => i.id === id);
+  if (item) {
+    item.done = !item.done;
+    saveData();
+    render();
+  }
+}
+
+function toggleCategory(header) {
+  const body = header.nextElementSibling;
+  const icon = header.querySelector('.category-toggle');
+  body.classList.toggle('collapsed');
+  icon.classList.toggle('collapsed');
+}
+
+function setFilter(filter, btn) {
+  currentFilter = filter;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}
+
+function changeWeek(delta) {
+  const d = new Date(currentWeekKey + 'T00:00:00');
+  d.setDate(d.getDate() + delta * 7);
+  currentWeekKey = getWeekKey(d);
+  render();
+}
+
+function goToday() {
+  currentWeekKey = getWeekKey(new Date());
+  render();
+}
+
+// ========== 모달 ==========
+function openAddModal() {
+  document.getElementById('modalTitle').textContent = '체크리스트 항목 추가';
+  document.getElementById('editItemId').value = '';
+  document.getElementById('itemText').value = '';
+  document.getElementById('itemPriority').value = 'mid';
+  document.getElementById('itemPerson').value = '';
+  document.getElementById('itemDeadline').value = '';
+  document.getElementById('itemNote').value = '';
+  populateCategorySelect();
+  document.getElementById('itemModal').classList.add('show');
+  setTimeout(() => document.getElementById('itemText').focus(), 100);
+}
+
+function openEditModal(id) {
+  const week = getCurrentWeek();
+  const item = week.items.find(i => i.id === id);
+  if (!item) return;
+  document.getElementById('modalTitle').textContent = '체크리스트 항목 수정';
+  document.getElementById('editItemId').value = id;
+  document.getElementById('itemText').value = item.text;
+  document.getElementById('itemPriority').value = item.priority;
+  document.getElementById('itemPerson').value = item.person || '';
+  document.getElementById('itemDeadline').value = item.deadline || '';
+  document.getElementById('itemNote').value = item.note || '';
+  populateCategorySelect(item.category);
+  document.getElementById('itemModal').classList.add('show');
+}
+
+function populateCategorySelect(selected) {
+  const sel = document.getElementById('itemCategory');
+  sel.innerHTML = data.categories.map(c =>
+    `<option value="${c}" ${c === selected ? 'selected' : ''}>${c}</option>`
+  ).join('');
+}
+
+function saveItem() {
+  const text = document.getElementById('itemText').value.trim();
+  if (!text) { alert('항목명을 입력하세요.'); return; }
+  const week = getCurrentWeek();
+  const editId = document.getElementById('editItemId').value;
+
+  if (editId) {
+    const item = week.items.find(i => i.id === parseInt(editId));
+    if (item) {
+      item.text = text;
+      item.category = document.getElementById('itemCategory').value;
+      item.priority = document.getElementById('itemPriority').value;
+      item.person = document.getElementById('itemPerson').value.trim();
+      item.deadline = document.getElementById('itemDeadline').value;
+      item.note = document.getElementById('itemNote').value.trim();
+    }
+  } else {
+    const maxId = Math.max(0, ...week.items.map(i => i.id));
+    week.items.push({
+      id: maxId + 1,
+      text,
+      category: document.getElementById('itemCategory').value,
+      priority: document.getElementById('itemPriority').value,
+      person: document.getElementById('itemPerson').value.trim(),
+      deadline: document.getElementById('itemDeadline').value,
+      note: document.getElementById('itemNote').value.trim(),
+      done: false
+    });
+  }
+
+  saveData();
+  closeModal('itemModal');
+  render();
+}
+
+function deleteItem(id) {
+  if (!confirm('이 항목을 삭제하시겠습니까?')) return;
+  const week = getCurrentWeek();
+  week.items = week.items.filter(i => i.id !== id);
+  saveData();
+  render();
+}
+
+// ========== 카테고리 관리 ==========
+function openCategoryModal() {
+  renderCategoryList();
+  document.getElementById('catModal').classList.add('show');
+}
+
+function renderCategoryList() {
+  const list = document.getElementById('catList');
+  list.innerHTML = data.categories.map((c, i) =>
+    `<li>
+      <input type="text" value="${c}" onchange="renameCategory(${i}, this.value)" style="padding:6px 10px;border:1px solid var(--gray-300);border-radius:4px;font-size:13px;">
+      <button class="cat-del" onclick="deleteCategory(${i})">삭제</button>
+    </li>`
+  ).join('');
+}
+
+function addCategory() {
+  const name = document.getElementById('newCatName').value.trim();
+  if (!name) return;
+  if (data.categories.includes(name)) { alert('이미 존재하는 카테고리입니다.'); return; }
+  data.categories.push(name);
+  document.getElementById('newCatName').value = '';
+  saveData();
+  renderCategoryList();
+}
+
+function renameCategory(idx, newName) {
+  const oldName = data.categories[idx];
+  data.categories[idx] = newName;
+  Object.values(data.weeks).forEach(w => {
+    w.items.forEach(item => {
+      if (item.category === oldName) item.category = newName;
+    });
+  });
+  saveData();
+  render();
+}
+
+function deleteCategory(idx) {
+  if (data.categories.length <= 1) { alert('최소 1개의 카테고리가 필요합니다.'); return; }
+  const name = data.categories[idx];
+  if (!confirm(`'${name}' 카테고리를 삭제하시겠습니까?\n해당 카테고리의 항목은 '${data.categories[0]}' 으로 이동됩니다.`)) return;
+  data.categories.splice(idx, 1);
+  Object.values(data.weeks).forEach(w => {
+    w.items.forEach(item => {
+      if (item.category === name) item.category = data.categories[0];
+    });
+  });
+  saveData();
+  renderCategoryList();
+  render();
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('show');
+}
+
+// ========== 히스토리 ==========
+function updateHistoryRecord() {
+  const week = getCurrentWeek();
+  const total = week.items.length;
+  const done = week.items.filter(i => i.done).length;
+  const existing = data.history.findIndex(h => h.week === currentWeekKey);
+  const record = { week: currentWeekKey, label: getWeekLabel(currentWeekKey), total, done };
+  if (existing >= 0) data.history[existing] = record;
+  else data.history.push(record);
+  data.history.sort((a, b) => b.week.localeCompare(a.week));
+  if (data.history.length > 12) data.history = data.history.slice(0, 12);
+  saveData();
+}
+
+function renderHistory() {
+  const tbody = document.getElementById('historyBody');
+  if (data.history.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--gray-400);padding:20px;">히스토리 데이터가 없습니다.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = data.history.map(h => {
+    const pct = h.total > 0 ? Math.round((h.done / h.total) * 100) : 0;
+    const color = pct >= 80 ? 'var(--success)' : pct >= 50 ? 'var(--warning)' : 'var(--danger)';
+    return `<tr>
+      <td>${h.label}</td>
+      <td>${h.total}</td>
+      <td>${h.done}</td>
+      <td>
+        <span class="pct-bar"><span class="pct-bar-fill" style="width:${pct}%;background:${color}"></span></span>
+        <strong style="color:${color}">${pct}%</strong>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// ========== CSV 내보내기 ==========
+function exportCSV() {
+  const week = getCurrentWeek();
+  const BOM = '\uFEFF';
+  let csv = BOM + '카테고리,항목명,우선순위,담당자,마감일,비고,완료여부\n';
+  const prioLabel = { high: '긴급', mid: '보통', low: '낮음' };
+  week.items.forEach(item => {
+    const row = [
+      item.category,
+      `"${item.text}"`,
+      prioLabel[item.priority],
+      item.person || '',
+      item.deadline || '',
+      `"${item.note || ''}"`,
+      item.done ? 'O' : 'X'
+    ];
+    csv += row.join(',') + '\n';
+  });
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `주착실적_체크리스트_${currentWeekKey}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ESC 키로 모달 닫기
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-overlay.show').forEach(m => m.classList.remove('show'));
+  }
+});
+
+// 모달 바깥 클릭 시 닫기
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) overlay.classList.remove('show');
+  });
+});
+
+// 초기 렌더링
+render();
+</script>
+</body>
+</html>
