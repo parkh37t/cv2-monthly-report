@@ -82,7 +82,7 @@ th.ach-col{background:#d1fae5;color:var(--ok)}
   <div class="hdr-in">
     <div>
       <h1>컨버전스 2본부 - 2026년 월별 현황 관리</h1>
-      <div class="sub">매출목표 70억 | 영업이익목표 6.5억 | 실적 등록/수정/삭제 및 엑셀 다운로드</div>
+      <div class="sub">매출목표 70억 | 영업이익목표 6.7억 | 실적 등록/수정/삭제 및 엑셀 다운로드</div>
     </div>
     <div class="hdr-r">
       <select id="selMonth" onchange="switchMonth()">
@@ -211,7 +211,7 @@ th.ach-col{background:#d1fae5;color:var(--ok)}
 const STORAGE='cv2_monthly_v12';
 const DEPT='컨버전스 2본부';
 const TARGET_REVENUE=7000000000;
-const TARGET_OP_PROFIT=650000000;
+const TARGET_OP_PROFIT=670000000;
 const MONTHS=Array.from({length:12},(_,i)=>i+1);
 let curMonth=3, curModalType='', curEditIdx=-1, curEditMonth=null;
 const viewMode={labor:false,invoice:false,payment:false,purchase:false,expense:false};
@@ -425,7 +425,7 @@ function renderDashboard(){
     <div class="card" style="border-left:3px solid #ea580c"><div class="lb">누적 계약매출</div><div class="vl" style="color:#ea580c">${fmtB(contractTotal)}</div>
       <div class="pbar"><div class="pbar-f" style="width:${Math.min((contractTotal/TARGET_REVENUE)*100,100)}%;background:#ea580c"></div></div>
       <div class="sub">목표대비 ${pct(contractTotal,TARGET_REVENUE)}</div></div>
-    <div class="card"><div class="lb">누계 매출(월별)</div><div class="vl blue">${fmtB(annRev)}</div>
+    <div class="card"><div class="lb">매출액(월별 진행)</div><div class="vl blue">${fmtB(annRev)}</div>
       <div class="pbar"><div class="pbar-f" style="width:${Math.min(revAch*100,100)}%;background:var(--primary)"></div></div>
       <div class="sub">달성률 ${pct(annRev,TARGET_REVENUE)}</div></div>
     <div class="card"><div class="lb">영업이익 목표</div><div class="vl ${TARGET_OP_PROFIT>=0?'pos':'neg'}">${fmtB(TARGET_OP_PROFIT)}</div><div class="sub">연간 목표</div></div>
