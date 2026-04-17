@@ -73,23 +73,51 @@ th.ach-col{background:#d1fae5;color:var(--ok)}
 .mchip:hover{border-color:var(--primary);color:var(--primary)}.mchip.cur{background:var(--primary);color:#fff;border-color:var(--primary)}.mchip.has{background:var(--ok-l);color:var(--ok);border-color:#a7f3d0}
 .vtog{display:flex;gap:4px}.vtog button{padding:4px 10px;border-radius:4px;font-size:11px;cursor:pointer;border:1px solid var(--g300);background:#fff;color:var(--g600)}.vtog button.active{background:var(--primary);color:#fff;border-color:var(--primary)}
 .grp-hdr td{background:#eef2ff !important;font-weight:700;color:var(--primary);font-size:12px;padding:6px 10px !important}
-.rpanel{position:fixed;right:16px;top:88px;width:240px;max-height:calc(100vh - 108px);overflow-y:auto;z-index:50;display:flex;flex-direction:column;gap:8px}
-.rp-ttl{background:linear-gradient(135deg,#0f3d8c 0%,#1a56db 100%);color:#fff;padding:8px 12px;border-radius:8px;font-size:12px;font-weight:700;box-shadow:var(--shm);letter-spacing:.3px}
-.rp-card{background:#fff;border-radius:8px;padding:10px 12px;box-shadow:var(--sh);border-left:3px solid var(--primary);transition:transform .15s,box-shadow .15s}
-.rp-card:hover{transform:translateX(-2px);box-shadow:var(--shm)}
-.rp-card.c2{border-left-color:#059669}.rp-card.c3{border-left-color:#d97706}.rp-card.c4{border-left-color:#7c3aed}
-.rp-name{font-size:11.5px;font-weight:700;color:var(--g800);line-height:1.3;margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--g100)}
-.rp-row{display:flex;justify-content:space-between;align-items:baseline;font-size:10.5px;padding:2px 0}
-.rp-row .lb{color:var(--g500)}
-.rp-row .vl{font-weight:600;color:var(--g800);font-variant-numeric:tabular-nums}
-.rp-row .vl.pri{color:var(--primary)}
-.rp-row .vl.ok{color:var(--ok)}
-.rp-row .vl.wn{color:var(--warn)}
-.rp-row .vl.neg{color:var(--err)}
-.rp-pbar{height:5px;background:var(--g200);border-radius:3px;overflow:hidden;margin-top:6px}
-.rp-pbar-f{height:100%;border-radius:3px;transition:width .5s;background:var(--primary)}
-.rp-card.c2 .rp-pbar-f{background:#059669}.rp-card.c3 .rp-pbar-f{background:#d97706}.rp-card.c4 .rp-pbar-f{background:#7c3aed}
-@media(max-width:1480px){.rpanel{display:none}}
+.fpanel{position:fixed;right:12px;top:84px;width:212px;max-height:calc(100vh - 100px);overflow-y:auto;z-index:50;background:rgba(255,255,255,.96);backdrop-filter:blur(8px);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.12),0 2px 6px rgba(0,0,0,.08);border:1px solid rgba(229,231,235,.8)}
+.fp-hdr{padding:8px 10px;border-bottom:1px solid var(--g100);background:linear-gradient(135deg,#0f3d8c,#1a56db);color:#fff;border-radius:10px 10px 0 0;display:flex;justify-content:space-between;align-items:center;gap:6px}
+.fp-hdr .t{font-size:11.5px;font-weight:700;letter-spacing:.2px}
+.fp-hdr .s{font-size:10px;opacity:.85}
+.fp-list{padding:6px}
+.fp-item{padding:8px 10px;border-radius:7px;cursor:pointer;margin-bottom:4px;border-left:3px solid var(--primary);background:#fff;transition:all .15s;position:relative}
+.fp-item:hover{background:#f0f7ff;transform:translateX(-1px)}
+.fp-item.c2{border-left-color:#059669}.fp-item.c2:hover{background:#ecfdf5}
+.fp-item.c3{border-left-color:#d97706}.fp-item.c3:hover{background:#fffbeb}
+.fp-item.c4{border-left-color:#7c3aed}.fp-item.c4:hover{background:#f5f3ff}
+.fp-row1{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:2px;gap:6px}
+.fp-nm{font-size:11.5px;font-weight:700;color:var(--g800);line-height:1.2;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fp-pct{font-size:10px;font-weight:700;color:var(--primary);white-space:nowrap}
+.fp-item.c2 .fp-pct{color:#059669}.fp-item.c3 .fp-pct{color:#d97706}.fp-item.c4 .fp-pct{color:#7c3aed}
+.fp-row2{display:flex;justify-content:space-between;align-items:baseline;font-size:11px}
+.fp-lb{color:var(--g500);font-size:10px}
+.fp-vl{font-weight:700;color:var(--g800);font-variant-numeric:tabular-nums}
+.fp-mbar{height:3px;background:var(--g100);border-radius:2px;margin-top:5px;overflow:hidden}
+.fp-mbar-f{height:100%;border-radius:2px;background:var(--primary);transition:width .5s}
+.fp-item.c2 .fp-mbar-f{background:#059669}.fp-item.c3 .fp-mbar-f{background:#d97706}.fp-item.c4 .fp-mbar-f{background:#7c3aed}
+.fp-sum{padding:8px 12px;border-top:1px solid var(--g100);background:#f8fafc;border-radius:0 0 10px 10px;font-size:10.5px}
+.fp-sum-r{display:flex;justify-content:space-between;padding:2px 0}
+.fp-sum-r .vl{font-weight:700;color:var(--primary);font-variant-numeric:tabular-nums}
+.fp-tog{position:fixed;right:12px;top:84px;width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#0f3d8c,#1a56db);color:#fff;border:none;cursor:pointer;box-shadow:0 4px 8px rgba(0,0,0,.15);z-index:51;display:none;align-items:center;justify-content:center;font-size:16px}
+.fpanel.hid{display:none}.fpanel.hid+.fp-tog{display:flex}
+@media(max-width:1200px){.fpanel{width:196px;right:8px}}
+@media(max-width:1024px){.fpanel{display:none}}
+.pm-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;align-items:center;justify-content:center;padding:20px}
+.pm-modal.show{display:flex}
+.pm-box{background:#fff;border-radius:12px;width:100%;max-width:560px;max-height:92vh;overflow-y:auto;box-shadow:0 20px 50px rgba(0,0,0,.25)}
+.pm-hdr{padding:16px 20px;border-bottom:1px solid var(--g200);display:flex;justify-content:space-between;align-items:center;background:linear-gradient(135deg,#0f3d8c,#1a56db);color:#fff;border-radius:12px 12px 0 0}
+.pm-hdr h3{font-size:15px;font-weight:700;line-height:1.3}
+.pm-close{background:rgba(255,255,255,.2);color:#fff;border:none;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center}
+.pm-close:hover{background:rgba(255,255,255,.35)}
+.pm-body{padding:16px 20px}
+.pm-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px}
+.pm-fg{display:flex;flex-direction:column;gap:4px}
+.pm-fg.full{grid-column:span 2}
+.pm-fg label{font-size:11.5px;font-weight:600;color:var(--g600)}
+.pm-fg input{padding:7px 10px;border:1px solid var(--g300);border-radius:6px;font-size:13px;font-family:inherit;text-align:right;font-variant-numeric:tabular-nums}
+.pm-fg input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-l)}
+.pm-fg input[readonly]{background:var(--g50);color:var(--g500)}
+.pm-sec{margin-top:14px;padding-top:12px;border-top:1px solid var(--g200)}
+.pm-sec-t{font-size:12px;font-weight:700;color:var(--g700);margin-bottom:8px}
+.pm-ft{padding:12px 20px;border-top:1px solid var(--g200);display:flex;justify-content:flex-end;gap:8px;background:var(--g50);border-radius:0 0 12px 12px}
 @media(max-width:768px){.ct{padding:12px}.cards{grid-template-columns:repeat(2,1fr)}.risk-wrap{grid-template-columns:1fr}}
 </style>
 </head>
@@ -218,55 +246,24 @@ th.ach-col{background:#d1fae5;color:var(--ok)}
   </div>
 </div>
 
-<!-- 우측 고정 진행매출 상세 패널 -->
-<aside class="rpanel" id="rpanel">
-  <div class="rp-ttl">&#128202; 3월 진행매출 상세 (4개 프로젝트)</div>
-  <div class="rp-card c1">
-    <div class="rp-name">수협중앙회 수산물사이버직매장 재구축</div>
-    <div class="rp-row"><span class="lb">계약금액</span><span class="vl">700,000,000</span></div>
-    <div class="rp-row"><span class="lb">3월 진행매출</span><span class="vl pri">2,803,761</span></div>
-    <div class="rp-row"><span class="lb">3월 매출원가</span><span class="vl">2,776,580</span></div>
-    <div class="rp-row"><span class="lb">3월 매출이익</span><span class="vl ok">27,181</span></div>
-    <div class="rp-row"><span class="lb">누계 매출</span><span class="vl">690,167,684</span></div>
-    <div class="rp-row"><span class="lb">누계 진행률</span><span class="vl ok">98.6%</span></div>
-    <div class="rp-pbar"><div class="rp-pbar-f" style="width:98.6%"></div></div>
+<!-- 플로팅 진행매출 패널 -->
+<aside class="fpanel" id="fpanel"></aside>
+<button class="fp-tog" id="fpTog" onclick="toggleFpanel()" title="진행매출 패널 열기">&#128202;</button>
+
+<!-- 프로젝트 상세 편집 모달 -->
+<div class="pm-modal" id="pmModal">
+  <div class="pm-box">
+    <div class="pm-hdr">
+      <h3 id="pmTitle">프로젝트 상세</h3>
+      <button class="pm-close" onclick="closeProjModal()">×</button>
+    </div>
+    <div class="pm-body" id="pmBody"></div>
+    <div class="pm-ft">
+      <button class="btn btn-s" onclick="closeProjModal()">취소</button>
+      <button class="btn btn-p" onclick="saveProjModal()">저장</button>
+    </div>
   </div>
-  <div class="rp-card c2">
-    <div class="rp-name">법원도서관 미래통합관리시스템 구축</div>
-    <div class="rp-row"><span class="lb">계약금액</span><span class="vl">249,090,909</span></div>
-    <div class="rp-row"><span class="lb">3월 진행매출</span><span class="vl pri">17,655,477</span></div>
-    <div class="rp-row"><span class="lb">3월 매출원가</span><span class="vl">13,529,436</span></div>
-    <div class="rp-row"><span class="lb">3월 매출이익</span><span class="vl ok">4,126,041</span></div>
-    <div class="rp-row"><span class="lb">누계 매출</span><span class="vl">128,081,087</span></div>
-    <div class="rp-row"><span class="lb">누계 진행률</span><span class="vl wn">51.4%</span></div>
-    <div class="rp-pbar"><div class="rp-pbar-f" style="width:51.4%"></div></div>
-  </div>
-  <div class="rp-card c3">
-    <div class="rp-name">DB손해보험 PA 모바일 영업지원 시스템 구축</div>
-    <div class="rp-row"><span class="lb">계약금액</span><span class="vl">513,636,364</span></div>
-    <div class="rp-row"><span class="lb">3월 진행매출</span><span class="vl pri">147,725,491</span></div>
-    <div class="rp-row"><span class="lb">3월 매출원가</span><span class="vl">127,049,517</span></div>
-    <div class="rp-row"><span class="lb">3월 매출이익</span><span class="vl ok">20,675,974</span></div>
-    <div class="rp-row"><span class="lb">누계 매출</span><span class="vl">168,950,987</span></div>
-    <div class="rp-row"><span class="lb">누계 진행률</span><span class="vl wn">32.9%</span></div>
-    <div class="rp-pbar"><div class="rp-pbar-f" style="width:32.9%"></div></div>
-  </div>
-  <div class="rp-card c4">
-    <div class="rp-name">메리츠화재 TM 교육시스템 (LMS) 구축</div>
-    <div class="rp-row"><span class="lb">계약금액</span><span class="vl">842,727,273</span></div>
-    <div class="rp-row"><span class="lb">3월 진행매출</span><span class="vl pri">5,553,213</span></div>
-    <div class="rp-row"><span class="lb">3월 매출원가</span><span class="vl">4,837,245</span></div>
-    <div class="rp-row"><span class="lb">3월 매출이익</span><span class="vl ok">715,968</span></div>
-    <div class="rp-row"><span class="lb">누계 매출</span><span class="vl">5,553,213</span></div>
-    <div class="rp-row"><span class="lb">누계 진행률</span><span class="vl neg">0.66%</span></div>
-    <div class="rp-pbar"><div class="rp-pbar-f" style="width:0.66%"></div></div>
-  </div>
-  <div class="rp-card" style="border-left-color:#64748b;background:#f8fafc">
-    <div class="rp-name" style="border-bottom:none;margin-bottom:2px">4개 프로젝트 3월 합계</div>
-    <div class="rp-row"><span class="lb">진행매출 합계</span><span class="vl pri">173,737,942</span></div>
-    <div class="rp-row"><span class="lb">매출이익 합계</span><span class="vl ok">25,545,164</span></div>
-  </div>
-</aside>
+</div>
 
 <!-- 모달 -->
 <div class="mo" id="modal"><div class="mo-c">
@@ -275,7 +272,7 @@ th.ach-col{background:#d1fae5;color:var(--ok)}
 </div></div>
 
 <script>
-const STORAGE='cv2_monthly_v13';
+const STORAGE='cv2_monthly_v14';
 const DEPT='컨버전스 2본부';
 const TARGET_REVENUE=7000000000;
 const TARGET_OP_PROFIT=670000000;
@@ -400,32 +397,63 @@ function defaultData(){
     {type:'법인카드',desc:'김남경',project:'디비손해보험 전산시스템 개발',amount:34700}
   ];
 
-  // ===== 3월 실적 (월별손익 시트 기준, 진행매출 8개 프로젝트 합산) =====
+  // ===== 3월 결산 (월별손익/매출세금계산서/매입_턴키/인건비/직접비_간접비 시트 기준) =====
   const m3=d.months[3];
   m3.revenue=294972668;
-  m3.indirect=0;
+  m3.indirect=47018104;
   m3.labor=[
+    {type:'공통',project:'공통',intPerson:1,intCost:9053179,extPerson:0,extCost:0,fee:0},
+    {type:'제안',project:'IBK 디지털뱅킹 리빌딩 1단계 제안',intPerson:0.5,intCost:4378626,extPerson:0,extCost:0,fee:0},
+    {type:'제안',project:'KB 코어뱅킹 현대화 프로젝트 제안',intPerson:1.37,intCost:8487006,extPerson:0,extCost:0,fee:0},
     {type:'프로젝트',project:'메리츠화재 인터넷 마케팅 플랫폼 운영 용역',intPerson:10,intCost:55000000,extPerson:2,extCost:13211900,fee:0},
-    {type:'프로젝트',project:'엘지씨엔에스_하나은행 FIRST 하나원큐 UIUX',intPerson:0.4,intCost:2350000,extPerson:3.42,extCost:27284000,fee:0},
-    {type:'프로젝트',project:'수협중앙회 수산물 사이버 직매장 시스템',intPerson:0.4,intCost:3265484,extPerson:0,extCost:0,fee:0},
-    {type:'프로젝트',project:'법원도서관 미래통합관리시스템 구축 및 데이터 연계활용성 강화',intPerson:1,intCost:7000000,extPerson:2,extCost:12000000,fee:0},
+    {type:'프로젝트',project:'하나은행 비대면 채널 시스템 구축',intPerson:0.4,intCost:2350000,extPerson:3.42,extCost:27284000,fee:0},
+    {type:'프로젝트',project:'수협중앙회 수산물 사이버 직매장 시스템',intPerson:0.3,intCost:2776580,extPerson:0,extCost:0,fee:0},
+    {type:'프로젝트',project:'법원도서관 미래통합관리시스템 구축',intPerson:1,intCost:7000000,extPerson:1,extCost:6000000,fee:0},
     {type:'프로젝트',project:'CTK 플랫폼 고도화 사업 프로젝트',intPerson:1.9,intCost:13910000,extPerson:0,extCost:0,fee:0},
     {type:'프로젝트',project:'DB손해보험 개인 PA모바일영업지원시스템 구축',intPerson:3.5,intCost:21100000,extPerson:4,extCost:35200000,fee:0},
-    {type:'프로젝트',project:'메리츠화재 TM LMS 교육시스템 구축',intPerson:0.29,intCost:3193548,extPerson:0.58,extCost:4253226,fee:0},
-    {type:'프로젝트',project:'CTKCLIP&파트너사이트 운영',intPerson:0,intCost:0,extPerson:0.58,extCost:4380000,fee:0}
+    {type:'프로젝트',project:'메리츠화재 TM 교육시스템(LMS) 구축',intPerson:0.29,intCost:3193548,extPerson:0.58,extCost:4253226,fee:0},
+    {type:'프로젝트',project:'CTKCLIP&파트너사이트 운영',intPerson:0,intCost:0,extPerson:0.58,extCost:4380000,fee:0},
+    {type:'유휴',project:'유휴',intPerson:4.65,intCost:23292371,extPerson:0,extCost:0,fee:0}
   ];
   m3.invoice=[
-    {type:'매출',date:'2026-03-31',client:'(예상)',bizNo:'',item:'3월 예상 발행매출',amount:234679415,dept:DEPT}
+    {type:'매출',date:'2026-03-31',client:'(주)엘지씨엔에스',bizNo:'116-81-19477',item:'하나은행 FIRST 원큐 프로젝트 잔금',amount:1344050190,dept:DEPT},
+    {type:'매출',date:'2026-03-25',client:'메리츠화재해상보험',bizNo:'116-81-03752',item:'메리츠화재 인터넷 플랫폼 3월 용역 (TM 업무 분)',amount:73600000,dept:DEPT},
+    {type:'매출',date:'2026-03-25',client:'메리츠화재해상보험',bizNo:'116-81-03752',item:'메리츠화재 인터넷 플랫폼 (추가합의) 3월 용역',amount:8600000,dept:DEPT},
+    {type:'매출',date:'2026-03-25',client:'메리츠화재해상보험',bizNo:'116-81-03752',item:'메리츠화재 홈페이지 웹접근성 인증 용역 잔금',amount:22727273,dept:DEPT},
+    {type:'매출',date:'2026-03-19',client:'DB손해보험㈜',bizNo:'201-81-45593',item:'PA 모바일 영업지원시스템 구축',amount:243181818,dept:DEPT},
+    {type:'매출',date:'2026-03-26',client:'메리츠화재해상보험',bizNo:'116-81-03752',item:'메리츠화재 TM교육시스템(LMS) 구축 선금',amount:252818182,dept:DEPT}
+  ];
+  m3.purchase=[
+    {type:'매입',date:'2026-03-25',client:'주식회사 피칸소프트',bizNo:'369-87-03270',item:'DB손해보험 PA 모바일 영업지원 시스템 구축(선급50%)',amount:100250000,dept:DEPT}
   ];
   m3.expense=[
-    {type:'예상',desc:'3월 예상 직접비',project:'프로젝트 공통',amount:1952800}
+    {type:'통로이미지(주)',desc:'클립아트코리아 이미지',project:'컨버전스 2본부 공통',amount:50817},
+    {type:'(주)맥플러스',desc:'Adobe 연간사용료',project:'컨버전스 2본부 공통',amount:865000},
+    {type:'FIGMA',desc:'FIGMA',project:'컨버전스 2본부 공통',amount:447917},
+    {type:'개인경비',desc:'이인숙',project:'메리츠화재 운영',amount:83500},
+    {type:'법인카드',desc:'임지수',project:'하나은행_UIUX',amount:146100},
+    {type:'법인카드',desc:'김익중',project:'법원도서관',amount:59700},
+    {type:'(주)킴스렌탈',desc:'장비렌탈비',project:'법원도서관',amount:55000},
+    {type:'서울보증보험',desc:'선금보증보험',project:'디비손해보험 전산시스템 개발',amount:1545490},
+    {type:'법인카드',desc:'김남경',project:'디비손해보험 전산시스템 개발',amount:1016500},
+    {type:'개인경비',desc:'소지희, 민주영',project:'디비손해보험 전산시스템 개발',amount:16400},
+    {type:'서울보증보험',desc:'계약보증보험',project:'메리츠화재 TM교육시스템(LMS) 구축',amount:304100},
+    {type:'개인경비',desc:'표종락',project:'수협중앙회 수산물사이버직매장',amount:9000}
   ];
+
+  // 4개 프로젝트 상세 (사이드바/편집)
+  d.projects3={
+    suhyup:{name:'수협중앙회 수산물사이버직매장 재구축',color:'#1a56db',contract:700000000,budget:650782740,budgetNew:693213919,revenue:2803761,cost:2776580,profit:27181,cumRevenue:690167684,cumProfit:6690762,progress:98.60},
+    bdl:{name:'법원도서관 미래통합관리시스템 구축',color:'#059669',contract:249090909,budget:192932000,budgetNew:192649000,revenue:17655477,cost:13529436,profit:4126041,cumRevenue:128081087,cumProfit:29022099,progress:51.42},
+    dbi:{name:'DB손해보험 PA 모바일 영업지원 시스템 구축',color:'#d97706',contract:513636364,budget:441746727,budgetNew:441746727,revenue:147725491,cost:127049517,profit:20675974,cumRevenue:168950987,cumProfit:23646739,progress:32.89},
+    mtm:{name:'메리츠화재 TM 교육시스템(LMS) 구축',color:'#7c3aed',contract:842727273,budget:734075548,budgetNew:734075548,revenue:5553213,cost:4837245,profit:715968,cumRevenue:5553213,cumProfit:715968,progress:0.66}
+  };
 
   return d;
 }
 
 let data=load();
-function load(){const r=localStorage.getItem(STORAGE);if(r){const d=JSON.parse(r);MONTHS.forEach(m=>{if(!d.months[m])d.months[m]=emptyMonth()});if(!d.contractSales)d.contractSales=defaultContractSales();return d}return defaultData()}
+function load(){const r=localStorage.getItem(STORAGE);if(r){const d=JSON.parse(r);MONTHS.forEach(m=>{if(!d.months[m])d.months[m]=emptyMonth()});if(!d.contractSales)d.contractSales=defaultContractSales();if(!d.projects3)d.projects3=defaultData().projects3;return d}return defaultData()}
 function defaultContractSales(){return[
   {project:'메리츠화재 인터넷 마케팅 플랫폼 운영',amount:909000000},
   {project:'하나은행 비대면채널 시스템구축',amount:132029700},
@@ -475,7 +503,95 @@ function switchMonth(){curMonth=parseInt(document.getElementById('selMonth').val
 function render(){
   const ml=curMonth+'월';
   document.querySelectorAll('#laborMonthLabel,#invMonthLabel,#payMonthLabel,#purMonthLabel,#expMonthLabel').forEach(el=>el.textContent=ml);
-  renderDashboard();renderLabor();renderInvoice();renderPayment();renderPurchase();renderExpense();renderContract();
+  renderDashboard();renderLabor();renderInvoice();renderPayment();renderPurchase();renderExpense();renderContract();renderFpanel();
+}
+
+// ===== 플로팅 진행매출 패널 =====
+const PROJ_KEYS=['suhyup','bdl','dbi','mtm'];
+const PROJ_CLS={suhyup:'',bdl:'c2',dbi:'c3',mtm:'c4'};
+const PROJ_SHORT={suhyup:'수협중앙회',bdl:'법원도서관',dbi:'DB손해보험',mtm:'메리츠TM LMS'};
+function renderFpanel(){
+  const el=document.getElementById('fpanel');if(!el)return;
+  const p3=data.projects3||{};
+  const sumRev=PROJ_KEYS.reduce((s,k)=>s+num(p3[k]?.revenue),0);
+  const sumProfit=PROJ_KEYS.reduce((s,k)=>s+num(p3[k]?.profit),0);
+  let html=`<div class="fp-hdr"><span class="t">&#128202; ${curMonth}월 진행매출</span><span class="s">${fmtB(sumRev)}</span></div><div class="fp-list">`;
+  PROJ_KEYS.forEach(k=>{
+    const p=p3[k]||{};
+    const prog=num(p.progress);
+    html+=`<div class="fp-item ${PROJ_CLS[k]}" onclick="openProjModal('${k}')" title="클릭하여 상세/편집">
+      <div class="fp-row1"><span class="fp-nm">${PROJ_SHORT[k]}</span><span class="fp-pct">${prog.toFixed(1)}%</span></div>
+      <div class="fp-row2"><span class="fp-lb">${curMonth}월 매출</span><span class="fp-vl">${fmt(num(p.revenue))}</span></div>
+      <div class="fp-mbar"><div class="fp-mbar-f" style="width:${Math.min(prog,100)}%"></div></div>
+    </div>`;
+  });
+  html+=`</div><div class="fp-sum">
+    <div class="fp-sum-r"><span>4P 매출 합계</span><span class="vl">${fmt(sumRev)}</span></div>
+    <div class="fp-sum-r"><span>4P 이익 합계</span><span class="vl">${fmt(sumProfit)}</span></div>
+  </div>`;
+  el.innerHTML=html;
+}
+function toggleFpanel(){const el=document.getElementById('fpanel');el.classList.toggle('hid')}
+
+// ===== 프로젝트 상세 편집 모달 =====
+let curProjKey=null;
+function openProjModal(key){
+  curProjKey=key;
+  const p=(data.projects3||{})[key]||{};
+  document.getElementById('pmTitle').textContent=p.name||PROJ_SHORT[key];
+  const fmt0=v=>v==null?'':Number(v).toLocaleString('ko-KR');
+  document.getElementById('pmBody').innerHTML=`
+    <div class="pm-sec-t" style="margin-top:0">계약 정보</div>
+    <div class="pm-grid">
+      <div class="pm-fg"><label>계약금액 (원)</label><input id="pm_contract" value="${fmt0(p.contract)}"></div>
+      <div class="pm-fg"><label>예산 (원가 기준)</label><input id="pm_budget" value="${fmt0(p.budget)}"></div>
+      <div class="pm-fg full"><label>변경 예산 (원가 기준)</label><input id="pm_budgetNew" value="${fmt0(p.budgetNew)}"></div>
+    </div>
+    <div class="pm-sec"><div class="pm-sec-t">${curMonth}월 실적</div>
+      <div class="pm-grid">
+        <div class="pm-fg"><label>진행매출 (원)</label><input id="pm_revenue" value="${fmt0(p.revenue)}"></div>
+        <div class="pm-fg"><label>매출원가 (원)</label><input id="pm_cost" value="${fmt0(p.cost)}"></div>
+        <div class="pm-fg full"><label>매출이익 (= 매출 - 원가)</label><input id="pm_profit" value="${fmt0(p.profit)}" readonly></div>
+      </div>
+    </div>
+    <div class="pm-sec"><div class="pm-sec-t">누계 실적</div>
+      <div class="pm-grid">
+        <div class="pm-fg"><label>누계 매출 (원)</label><input id="pm_cumRevenue" value="${fmt0(p.cumRevenue)}"></div>
+        <div class="pm-fg"><label>누계 매출이익 (원)</label><input id="pm_cumProfit" value="${fmt0(p.cumProfit)}"></div>
+        <div class="pm-fg full"><label>누계 진행률 (%)</label><input id="pm_progress" value="${p.progress!=null?Number(p.progress).toFixed(2):''}"></div>
+      </div>
+    </div>`;
+  document.getElementById('pmModal').classList.add('show');
+  ['pm_revenue','pm_cost'].forEach(id=>{document.getElementById(id).addEventListener('input',updatePmProfit)});
+}
+function updatePmProfit(){
+  const r=parseNum(document.getElementById('pm_revenue').value);
+  const c=parseNum(document.getElementById('pm_cost').value);
+  document.getElementById('pm_profit').value=(r-c).toLocaleString('ko-KR');
+}
+function closeProjModal(){document.getElementById('pmModal').classList.remove('show');curProjKey=null}
+function saveProjModal(){
+  if(!curProjKey)return;
+  const v=id=>parseNum(document.getElementById(id).value);
+  data.projects3=data.projects3||{};
+  const p=data.projects3[curProjKey]||{};
+  p.contract=v('pm_contract');
+  p.budget=v('pm_budget');
+  p.budgetNew=v('pm_budgetNew');
+  p.revenue=v('pm_revenue');
+  p.cost=v('pm_cost');
+  p.profit=p.revenue-p.cost;
+  p.cumRevenue=v('pm_cumRevenue');
+  p.cumProfit=v('pm_cumProfit');
+  p.progress=parseFloat(document.getElementById('pm_progress').value)||0;
+  data.projects3[curProjKey]=p;
+  // 대시보드 3월 매출 재계산: 4개 프로젝트 + 고정 4개(메리츠인터넷 82M + 하나은행 34,434,726 + CTK 0 + CTKCLIP 4,800,000)
+  const FIXED_OTHERS=82000000+34434726+0+4800000;
+  const sum4=PROJ_KEYS.reduce((s,k)=>s+num(data.projects3[k]?.revenue),0);
+  data.months[3].revenue=FIXED_OTHERS+sum4;
+  save();
+  closeProjModal();
+  render();
 }
 
 function renderDashboard(){
