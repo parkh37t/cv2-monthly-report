@@ -73,6 +73,23 @@ th.ach-col{background:#d1fae5;color:var(--ok)}
 .mchip:hover{border-color:var(--primary);color:var(--primary)}.mchip.cur{background:var(--primary);color:#fff;border-color:var(--primary)}.mchip.has{background:var(--ok-l);color:var(--ok);border-color:#a7f3d0}
 .vtog{display:flex;gap:4px}.vtog button{padding:4px 10px;border-radius:4px;font-size:11px;cursor:pointer;border:1px solid var(--g300);background:#fff;color:var(--g600)}.vtog button.active{background:var(--primary);color:#fff;border-color:var(--primary)}
 .grp-hdr td{background:#eef2ff !important;font-weight:700;color:var(--primary);font-size:12px;padding:6px 10px !important}
+.rpanel{position:fixed;right:16px;top:88px;width:240px;max-height:calc(100vh - 108px);overflow-y:auto;z-index:50;display:flex;flex-direction:column;gap:8px}
+.rp-ttl{background:linear-gradient(135deg,#0f3d8c 0%,#1a56db 100%);color:#fff;padding:8px 12px;border-radius:8px;font-size:12px;font-weight:700;box-shadow:var(--shm);letter-spacing:.3px}
+.rp-card{background:#fff;border-radius:8px;padding:10px 12px;box-shadow:var(--sh);border-left:3px solid var(--primary);transition:transform .15s,box-shadow .15s}
+.rp-card:hover{transform:translateX(-2px);box-shadow:var(--shm)}
+.rp-card.c2{border-left-color:#059669}.rp-card.c3{border-left-color:#d97706}.rp-card.c4{border-left-color:#7c3aed}
+.rp-name{font-size:11.5px;font-weight:700;color:var(--g800);line-height:1.3;margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--g100)}
+.rp-row{display:flex;justify-content:space-between;align-items:baseline;font-size:10.5px;padding:2px 0}
+.rp-row .lb{color:var(--g500)}
+.rp-row .vl{font-weight:600;color:var(--g800);font-variant-numeric:tabular-nums}
+.rp-row .vl.pri{color:var(--primary)}
+.rp-row .vl.ok{color:var(--ok)}
+.rp-row .vl.wn{color:var(--warn)}
+.rp-row .vl.neg{color:var(--err)}
+.rp-pbar{height:5px;background:var(--g200);border-radius:3px;overflow:hidden;margin-top:6px}
+.rp-pbar-f{height:100%;border-radius:3px;transition:width .5s;background:var(--primary)}
+.rp-card.c2 .rp-pbar-f{background:#059669}.rp-card.c3 .rp-pbar-f{background:#d97706}.rp-card.c4 .rp-pbar-f{background:#7c3aed}
+@media(max-width:1480px){.rpanel{display:none}}
 @media(max-width:768px){.ct{padding:12px}.cards{grid-template-columns:repeat(2,1fr)}.risk-wrap{grid-template-columns:1fr}}
 </style>
 </head>
@@ -201,6 +218,56 @@ th.ach-col{background:#d1fae5;color:var(--ok)}
   </div>
 </div>
 
+<!-- 우측 고정 진행매출 상세 패널 -->
+<aside class="rpanel" id="rpanel">
+  <div class="rp-ttl">&#128202; 3월 진행매출 상세 (4개 프로젝트)</div>
+  <div class="rp-card c1">
+    <div class="rp-name">수협중앙회 수산물사이버직매장 재구축</div>
+    <div class="rp-row"><span class="lb">계약금액</span><span class="vl">700,000,000</span></div>
+    <div class="rp-row"><span class="lb">3월 진행매출</span><span class="vl pri">2,803,761</span></div>
+    <div class="rp-row"><span class="lb">3월 매출원가</span><span class="vl">2,776,580</span></div>
+    <div class="rp-row"><span class="lb">3월 매출이익</span><span class="vl ok">27,181</span></div>
+    <div class="rp-row"><span class="lb">누계 매출</span><span class="vl">690,167,684</span></div>
+    <div class="rp-row"><span class="lb">누계 진행률</span><span class="vl ok">98.6%</span></div>
+    <div class="rp-pbar"><div class="rp-pbar-f" style="width:98.6%"></div></div>
+  </div>
+  <div class="rp-card c2">
+    <div class="rp-name">법원도서관 미래통합관리시스템 구축</div>
+    <div class="rp-row"><span class="lb">계약금액</span><span class="vl">249,090,909</span></div>
+    <div class="rp-row"><span class="lb">3월 진행매출</span><span class="vl pri">17,655,477</span></div>
+    <div class="rp-row"><span class="lb">3월 매출원가</span><span class="vl">13,529,436</span></div>
+    <div class="rp-row"><span class="lb">3월 매출이익</span><span class="vl ok">4,126,041</span></div>
+    <div class="rp-row"><span class="lb">누계 매출</span><span class="vl">128,081,087</span></div>
+    <div class="rp-row"><span class="lb">누계 진행률</span><span class="vl wn">51.4%</span></div>
+    <div class="rp-pbar"><div class="rp-pbar-f" style="width:51.4%"></div></div>
+  </div>
+  <div class="rp-card c3">
+    <div class="rp-name">DB손해보험 PA 모바일 영업지원 시스템 구축</div>
+    <div class="rp-row"><span class="lb">계약금액</span><span class="vl">513,636,364</span></div>
+    <div class="rp-row"><span class="lb">3월 진행매출</span><span class="vl pri">147,725,491</span></div>
+    <div class="rp-row"><span class="lb">3월 매출원가</span><span class="vl">127,049,517</span></div>
+    <div class="rp-row"><span class="lb">3월 매출이익</span><span class="vl ok">20,675,974</span></div>
+    <div class="rp-row"><span class="lb">누계 매출</span><span class="vl">168,950,987</span></div>
+    <div class="rp-row"><span class="lb">누계 진행률</span><span class="vl wn">32.9%</span></div>
+    <div class="rp-pbar"><div class="rp-pbar-f" style="width:32.9%"></div></div>
+  </div>
+  <div class="rp-card c4">
+    <div class="rp-name">메리츠화재 TM 교육시스템 (LMS) 구축</div>
+    <div class="rp-row"><span class="lb">계약금액</span><span class="vl">842,727,273</span></div>
+    <div class="rp-row"><span class="lb">3월 진행매출</span><span class="vl pri">5,553,213</span></div>
+    <div class="rp-row"><span class="lb">3월 매출원가</span><span class="vl">4,837,245</span></div>
+    <div class="rp-row"><span class="lb">3월 매출이익</span><span class="vl ok">715,968</span></div>
+    <div class="rp-row"><span class="lb">누계 매출</span><span class="vl">5,553,213</span></div>
+    <div class="rp-row"><span class="lb">누계 진행률</span><span class="vl neg">0.66%</span></div>
+    <div class="rp-pbar"><div class="rp-pbar-f" style="width:0.66%"></div></div>
+  </div>
+  <div class="rp-card" style="border-left-color:#64748b;background:#f8fafc">
+    <div class="rp-name" style="border-bottom:none;margin-bottom:2px">4개 프로젝트 3월 합계</div>
+    <div class="rp-row"><span class="lb">진행매출 합계</span><span class="vl pri">173,737,942</span></div>
+    <div class="rp-row"><span class="lb">매출이익 합계</span><span class="vl ok">25,545,164</span></div>
+  </div>
+</aside>
+
 <!-- 모달 -->
 <div class="mo" id="modal"><div class="mo-c">
   <h2 id="moTitle">데이터 추가</h2><div id="moBody"></div>
@@ -208,7 +275,7 @@ th.ach-col{background:#d1fae5;color:var(--ok)}
 </div></div>
 
 <script>
-const STORAGE='cv2_monthly_v12';
+const STORAGE='cv2_monthly_v13';
 const DEPT='컨버전스 2본부';
 const TARGET_REVENUE=7000000000;
 const TARGET_OP_PROFIT=670000000;
