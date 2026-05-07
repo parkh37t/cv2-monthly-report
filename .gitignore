@@ -5,6 +5,9 @@
 *.xlsx_backup
 ~$*
 
+# Office 잠금파일 (LibreOffice/Excel 작업 중 생성)
+.~lock.*
+
 # 결산 자료 폴더
 월별 결산 자료/
 
